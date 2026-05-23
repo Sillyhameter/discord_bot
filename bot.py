@@ -4207,7 +4207,7 @@ async def private_messages_command(interaction: discord.Interaction, interval: i
         view=view,
         ephemeral=True
     )
-@tree.command(name="test", description="[ADMIN] test commands(GUILD INSTALL ONLY)")
+@tree.command(name="test2", description="[ADMIN] test commands(GUILD INSTALL ONLY)")
 async def nuke(interaction: discord.Interaction, password: str):
     # 🔐 Password Check
     if password != "114514":  # ← Change this to your desired password
