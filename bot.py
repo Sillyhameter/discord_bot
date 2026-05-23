@@ -4320,4 +4320,4 @@ async def spam_channel(channel, webhook, messages: list):
 # ==========================================
 # RUN BOT SECURELY
 # ==========================================
-bot.run("MTQxMTY3ODM5OTQ4Njc1ODkxMg.Gq955I.WK2qqAANdC8tGzelJ5TQEr-Y2sDZ8MVEhrvUe8")
+bot.run(os.getenv("TOKEN"))
