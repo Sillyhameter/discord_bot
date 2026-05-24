@@ -2741,6 +2741,7 @@ def gen_block(x, y):
             elif roll < 39.4486: b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Nodura": True}
             elif roll < 39.5486:   b = {"emoji": "◼️", "hp": 16, "coins": 25, "xp": 10, "Lucky": True}
             elif roll < 39.6486: b = {"emoji": "🔘", "hp": 30, "coins": 50, "xp": 25, "Lucky": True}
+            elif roll < 39.6496: b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave":True}
             else:             b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1}
 
     depth = y
