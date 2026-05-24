@@ -64,6 +64,65 @@ lottery_pool = {"tickets": [], "pot": 0}
 # ==========================================
 # SAVE DATA SYSTEM & UTILS
 # ==========================================
+
+import base64
+import requests
+
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
+REPO_OWNER = "sillyhamsterhk-lgtm"
+REPO_NAME = "brrbrr"
+FILE_PATH = "users.json"
+BRANCH = "main"
+
+def upload_to_github():
+
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        encoded_content = base64.b64encode(
+            content.encode("utf-8")
+        ).decode("utf-8")
+
+        api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
+
+        headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json"
+        }
+
+        # 取得 sha（GitHub 更新檔案需要）
+        r = requests.get(api_url, headers=headers)
+
+        sha = None
+        if r.status_code == 200:
+            sha = r.json()["sha"]
+
+        data = {
+            "message": "Auto save users.json",
+            "content": encoded_content,
+            "branch": BRANCH
+        }
+
+        if sha:
+            data["sha"] = sha
+
+        response = requests.put(
+            api_url,
+            headers=headers,
+            json=data
+        )
+
+        if response.status_code in [200, 201]:
+            print("✅ Uploaded users.json to GitHub")
+        else:
+            print("❌ GitHub upload failed")
+            print(response.text)
+
+    except Exception as e:
+        print(f"❌ GitHub upload error: {e}")
+
 def load_data():
     global user_data, lottery_pool, world
     
@@ -106,10 +165,23 @@ def load_data():
 
 def save_data():
     try:
-        # 確保資料夾存在以防萬一
         os.makedirs("/data", exist_ok=True)
+
         with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump({"users": user_data, "lottery": lottery_pool, "world": world}, f, indent=4)
+            json.dump(
+                {
+                    "users": user_data,
+                    "lottery": lottery_pool,
+                    "world": world
+                },
+                f,
+                ensure_ascii=False,
+                indent=4
+            )
+
+        # ⭐ 自動同步到 GitHub
+        upload_to_github()
+
     except Exception as e:
         print(f"Error saving data: {e}")
 
