@@ -163,65 +163,136 @@ def load_data():
     else:
         print("⚠️ No data file found. Starting with empty data.")
 
-def save_data():
-    try:
-        os.makedirs("/data", exist_ok=True)
+def load_data():
+    global user_data, lottery_pool, world
 
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "users": user_data,
-                    "lottery": lottery_pool,
-                    "world": world
-                },
-                f,
-                ensure_ascii=False,
-                indent=4
-            )
+    os.makedirs("/data", exist_ok=True)
 
-        # ⭐ 自動同步到 GitHub
-        upload_to_github()
+    if not os.path.exists(DATA_FILE):
+        print("⚠️ users.json not found in /data. Attempting to download from GitHub...")
+        try:
+            github_url = "https://raw.githubusercontent.com/Sillyhameter/discord_bot_data/main/users.json"
 
-    except Exception as e:
-        print(f"Error saving data: {e}")
+            response = requests.get(github_url)
+
+            if response.status_code == 200:
+                with open(DATA_FILE, "wb") as f:
+                    f.write(response.content)
+                print("✅ Successfully downloaded users.json from GitHub!")
+            else:
+                print(f"❌ Failed to download from GitHub. Status: {response.status_code}")
+        except Exception as e:
+            print(f"❌ Error downloading data: {e}")
+
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            user_data = data.get("users", {})
+            lottery_pool = data.get("lottery", {"tickets": [], "pot": 0})
+            world = data.get("world", {})
+
+            # ✅ 一次修復所有舊玩家資料
+            for uid in list(user_data.keys()):
+                init_user(uid)
+
+            save_data()
+
+            print(f"✅ Loaded data for {len(user_data)} users.")
+
+        except Exception as e:
+            print(f"❌ Error loading data: {e}")
+            user_data = {}
+            lottery_pool = {"tickets": [], "pot": 0}
+            world = {}
+            save_data()
+    else:
+        print("⚠️ No data file found. Starting with empty data.")
+        user_data = {}
+        lottery_pool = {"tickets": [], "pot": 0}
+        world = {}
+        save_data()
 
 def init_user(user_id):
     uid = str(user_id)
 
+    # 如果玩家不存在
     if uid not in user_data:
         user_data[uid] = {}
 
     u = user_data[uid]
 
+    # =========================
+    # 基本資料
+    # =========================
     u.setdefault("coins", 1000)
     u.setdefault("lang", "en")
+
+    # =========================
+    # 背包
+    # =========================
     u.setdefault("inventory", [])
-    u.setdefault("stats", {
-        "games_played": 0,
-        "money_wagered": 0,
-        "money_won": 0
-    })
-    u.setdefault("crypto", {})
-    u.setdefault("pet", None)
-    u.setdefault("partner", None)
 
-    # mine system
-    u.setdefault("xp", 0)
-    u.setdefault("mine_px", 3)
-    u.setdefault("mine_depth", 0)
-    u.setdefault("sack", 0)
-    u.setdefault("durability", 50)
-    u.setdefault("repairing", False)
-    u.setdefault("repair_end", 0)
-    u.setdefault("max_depth", 0)
-    u.setdefault("level", 1)
-
+    # 舊 Pickaxe 自動轉新系統
     if "Pickaxe" in u["inventory"] and "Pickaxe Lvl 1" not in u["inventory"]:
         u["inventory"].remove("Pickaxe")
         u["inventory"].append("Pickaxe Lvl 1")
 
+    # 防止沒有鎬子
     if not any(str(item).startswith("Pickaxe Lvl") for item in u["inventory"]):
         u["inventory"].append("Pickaxe Lvl 1")
+
+    # =========================
+    # 統計
+    # =========================
+    u.setdefault("stats", {})
+
+    u["stats"].setdefault("games_played", 0)
+    u["stats"].setdefault("money_wagered", 0)
+    u["stats"].setdefault("money_won", 0)
+
+    # =========================
+    # 其他系統
+    # =========================
+    u.setdefault("crypto", {})
+    u.setdefault("pet", None)
+    u.setdefault("partner", None)
+
+    # =========================
+    # Mine 系統
+    # =========================
+    u.setdefault("xp", 0)
+    u.setdefault("mine_px", 3)
+    u.setdefault("mine_depth", 0)
+    u.setdefault("sack", 0)
+
+    u.setdefault("durability", 50)
+    u.setdefault("repairing", False)
+    u.setdefault("repair_end", 0)
+
+    u.setdefault("max_depth", 0)
+    u.setdefault("level", 1)
+
+    # 洞穴系統
+    u.setdefault("in_cave", False)
+    u.setdefault("cave_grid", None)
+    u.setdefault("cave_px", 2)
+    u.setdefault("cave_py", 5)
+    u.setdefault("cave_earn", 0)
+    u.setdefault("cave_broken", 0)
+
+    # =========================
+    # cooldown 類（舊玩家補齊）
+    # =========================
+    u.setdefault("last_daily", 0)
+    u.setdefault("last_work", 0)
+    u.setdefault("last_crime", 0)
+    u.setdefault("last_earn", 0)
+    u.setdefault("last_fish", 0)
+    u.setdefault("last_trivia", 0)
+    u.setdefault("last_scramble", 0)
+    u.setdefault("last_mine", 0)
 
     return u
 
