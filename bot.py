@@ -123,45 +123,28 @@ def upload_to_github():
     except Exception as e:
         print(f"❌ GitHub upload error: {e}")
 
-def load_data():
-    global user_data, lottery_pool, world
-    
-    # 1. 確保 /data 資料夾存在
-    os.makedirs("/data", exist_ok=True)
-    
-    # 2. 【關鍵】如果 /data/users.json 不存在，嘗試從 GitHub 下載
-    if not os.path.exists(DATA_FILE):
-        print("⚠️ users.json not found in /data. Attempting to download from GitHub...")
-        try:
-            # ⚠️ 請將下方的 URL 換成你 GitHub repo 中 users.json 的 "Raw" 連結
-            # 格式: https://raw.githubusercontent.com/你的帳號/你的Repo名稱/main/users.json
-            github_url = "https://raw.githubusercontent.com/Sillyhameter/discord_bot_data/main/users.json"
-            
-            response = requests.get(github_url)
-            if response.status_code == 200:
-                with open(DATA_FILE, "wb") as f:
-                    f.write(response.content)
-                print("✅ Successfully downloaded users.json from GitHub!")
-            else:
-                print(f"❌ Failed to download from GitHub. Status: {response.status_code}")
-        except Exception as e:
-            print(f"❌ Error downloading  {e}")
+def save_data():
+    try:
+        # 確保 /data 存在
+        os.makedirs("/data", exist_ok=True)
 
-    # 3. 正常載入資料
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                user_data = data.get("users", {})
-                lottery_pool = data.get("lottery", {"tickets": [], "pot": 0})
-                world = data.get("world", {})
-                print(f"✅ Loaded data for {len(user_data)} users.")
-        except Exception as e:
-            print(f"❌ Error loading  {e}")
-            user_data = {}
-            lottery_pool = {"tickets": [], "pot": 0}
-    else:
-        print("⚠️ No data file found. Starting with empty data.")
+        # 存本地 users.json
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "users": user_data,
+                    "lottery": lottery_pool,
+                    "world": world
+                },
+                f,
+                ensure_ascii=False,
+                indent=4
+            )
+
+        print("💾 Local save complete")
+
+    except Exception as e:
+        print(f"❌ Error saving data: {e}")
 
 def load_data():
     global user_data, lottery_pool, world
