@@ -70,8 +70,8 @@ import requests
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-REPO_OWNER = "sillyhamsterhk-lgtm"
-REPO_NAME = "brrbrr"
+REPO_OWNER = "Sillyhameter"
+REPO_NAME = "discord_bot"
 FILE_PATH = "users.json"
 BRANCH = "main"
 
@@ -135,7 +135,7 @@ def load_data():
         try:
             # ⚠️ 請將下方的 URL 換成你 GitHub repo 中 users.json 的 "Raw" 連結
             # 格式: https://raw.githubusercontent.com/你的帳號/你的Repo名稱/main/users.json
-            github_url = "https://raw.githubusercontent.com/sillyhamsterhk-lgtm/brrbrr/refs/heads/main/users.json"
+            github_url = "https://raw.githubusercontent.com/Sillyhameter/discord_bot/main/users.json"
             
             response = requests.get(github_url)
             if response.status_code == 200:
