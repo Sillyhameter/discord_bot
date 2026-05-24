@@ -187,22 +187,43 @@ def save_data():
 
 def init_user(user_id):
     uid = str(user_id)
+
     if uid not in user_data:
-        user_data[uid] = {
-            "coins": 1000,
-            "lang": "en",
-            "inventory": [],
-            "stats": {"games_played": 0, "money_wagered": 0, "money_won": 0},
-            "crypto": {},
-            "pet": None,
-            "partner": None
-        }
-    # Retrofit old profiles
-    if "inventory" not in user_data[uid]: user_data[uid]["inventory"] = []
-    if "crypto" not in user_data[uid]: user_data[uid]["crypto"] = {}
-    if "pet" not in user_data[uid]: user_data[uid]["pet"] = None
-    if "partner" not in user_data[uid]: user_data[uid]["partner"] = None
-    return user_data[uid]
+        user_data[uid] = {}
+
+    u = user_data[uid]
+
+    u.setdefault("coins", 1000)
+    u.setdefault("lang", "en")
+    u.setdefault("inventory", [])
+    u.setdefault("stats", {
+        "games_played": 0,
+        "money_wagered": 0,
+        "money_won": 0
+    })
+    u.setdefault("crypto", {})
+    u.setdefault("pet", None)
+    u.setdefault("partner", None)
+
+    # mine system
+    u.setdefault("xp", 0)
+    u.setdefault("mine_px", 3)
+    u.setdefault("mine_depth", 0)
+    u.setdefault("sack", 0)
+    u.setdefault("durability", 50)
+    u.setdefault("repairing", False)
+    u.setdefault("repair_end", 0)
+    u.setdefault("max_depth", 0)
+    u.setdefault("level", 1)
+
+    if "Pickaxe" in u["inventory"] and "Pickaxe Lvl 1" not in u["inventory"]:
+        u["inventory"].remove("Pickaxe")
+        u["inventory"].append("Pickaxe Lvl 1")
+
+    if not any(str(item).startswith("Pickaxe Lvl") for item in u["inventory"]):
+        u["inventory"].append("Pickaxe Lvl 1")
+
+    return u
 
 def parse_bet(user_id, bet_str):
     """Parses 'all', 'half', or integer strings to return the bet amount."""
