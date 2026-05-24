@@ -633,8 +633,16 @@ async def roll(interaction: discord.Interaction, sides: int = 6):
 
 @tree.command(name="choose", description="Choose between two options")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-async def choose(interaction: discord.Interaction, option1: str, option2: str): 
-    await interaction.response.send_message(f"🤔 I choose: **{random.choice([option1, option2])}**")
+async def choose(interaction: discord.Interaction, option1: str, option2: str):
+
+    chosen = random.choice([option1, option2])
+
+    await interaction.response.send_message(
+        f"🤔 Options:\n"
+        f"1️⃣ {option1}\n"
+        f"2️⃣ {option2}\n\n"
+        f"🎉 I choose: **{chosen}**"
+    )
 
 @tree.command(name="avatar", description="Get a user's avatar")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
