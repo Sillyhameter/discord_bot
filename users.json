@@ -28,11 +28,11 @@
             "last_mine": 1775985738.2176323
         },
         "1130015134887198790": {
-            "coins": 5913,
+            "coins": 5813,
             "lang": "zh",
             "stats": {
-                "games_played": 146,
-                "money_wagered": 35375,
+                "games_played": 147,
+                "money_wagered": 35475,
                 "money_won": 52426
             },
             "last_earn": 1775985838.9053056,
@@ -40,7 +40,8 @@
             "inventory": [
                 "Fishing Rod",
                 "Pickaxe",
-                "VIP Badge"
+                "VIP Badge",
+                "Pickaxe Lvl 1"
             ],
             "last_trivia": 1775985852.6740537,
             "last_fish": 1775985859.565266,
@@ -50,11 +51,21 @@
             "last_scramble": 1775985404.8007143,
             "last_work": 1775985582.1432836,
             "last_crime": 1775985589.2218587,
-            "last_mine": 1775985865.414073
+            "last_mine": 1775985865.414073,
+            "xp": 0,
+            "mine_px": 3,
+            "mine_depth": 0,
+            "sack": 0,
+            "durability": 50,
+            "repairing": false,
+            "repair_end": 0,
+            "max_depth": 0,
+            "level": 1
         }
     },
     "lottery": {
         "tickets": [],
         "pot": 0
-    }
+    },
+    "world": {}
 }
