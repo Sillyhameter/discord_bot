@@ -52,14 +52,14 @@
             "last_work": 1775985582.1432836,
             "last_crime": 1775985589.2218587,
             "last_mine": 1775985865.414073,
-            "xp": 0,
+            "xp": 3,
             "mine_px": 3,
-            "mine_depth": 0,
+            "mine_depth": 1,
             "sack": 0,
-            "durability": 50,
+            "durability": 49,
             "repairing": false,
             "repair_end": 0,
-            "max_depth": 0,
+            "max_depth": 1,
             "level": 1
         }
     },
@@ -133,12 +133,12 @@
             "curr_hp": 2
         },
         "3,1": {
-            "emoji": "🟫",
-            "hp": 1,
+            "emoji": "⬜️",
+            "hp": 0,
+            "curr_hp": 0,
+            "max_hp": 0,
             "coins": 0,
-            "xp": 1,
-            "max_hp": 1,
-            "curr_hp": 1
+            "xp": 0
         },
         "4,1": {
             "emoji": "🟫",
