@@ -3049,11 +3049,23 @@ class MineView(discord.ui.View):
         return earn, log
 
     def gen_cave(self):
+
         grid = []
+
+        cave_type = self.u.get("cave_type", "normal")
+
+        mult = {
+            "poor": 0.75,
+            "normal": 1.0,
+            "rich": 1.25,
+            "chaos": 1.0,
+            "special": 1.5
+        }.get(cave_type, 1.0)
 
         for y in range(10):
             row = []
             for x in range(6):
+
                 hp = random.randint(1, 3)
 
                 b = {
@@ -3061,8 +3073,8 @@ class MineView(discord.ui.View):
                     "hp": hp,
                     "curr_hp": hp,
                     "max_hp": hp,
-                    "coins": random.randint(500, 3000),
-                    "xp": random.randint(300, 2000)
+                    "coins": int(random.randint(500, 3000) * mult),
+                    "xp": int(random.randint(300, 2000) * mult)
                 }
 
                 row.append(b)
@@ -3400,8 +3412,8 @@ class MineView(discord.ui.View):
                 self.u["cave_type"] = roll_cave_type()
                 self.u["cave_grid"] = self.gen_cave()
 
-                self.u["cave_px"] = 2
-                self.u["cave_py"] = 5
+                self.u["cave_px"] = max(0, min(5, tx))
+                self.u["cave_py"] = max(0, min(9, ty % 10))
 
                 self.u["cave_earn"] = 0
                 self.u["cave_broken"] = 0
