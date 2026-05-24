@@ -2525,20 +2525,14 @@ import random
 import asyncio
 import time
 
-# =========================
-# GLOBAL STATE
-# =========================
-
 WORLD_LIMIT = 50000
 
 def get_user_lock(uid):
+    uid = str(uid)
     if uid not in user_locks:
         user_locks[uid] = asyncio.Lock()
     return user_locks[uid]
 
-# =========================
-# USER INIT
-# =========================
 def init_user(uid):
     uid = str(uid)
 
@@ -2549,7 +2543,7 @@ def init_user(uid):
             "mine_px": 3,
             "mine_depth": 0,
             "sack": 0,
-            "durability": 30,
+            "durability": 50,
             "repairing": False,
             "repair_end": 0,
             "inventory": ["Pickaxe Lvl 1"],
@@ -2564,28 +2558,26 @@ def init_user(uid):
     u.setdefault("mine_px", 3)
     u.setdefault("mine_depth", 0)
     u.setdefault("sack", 0)
-    u.setdefault("durability", 30)
+    u.setdefault("durability", 50)
     u.setdefault("repairing", False)
     u.setdefault("repair_end", 0)
-    u.setdefault("inventory", ["Pickaxe Lvl 1"])
+    u.setdefault("inventory", [])
     u.setdefault("max_depth", 0)
     u.setdefault("level", 1)
 
+    # ✅ 防止舊玩家資料沒有鎬子，導致 tier = 0
+    if not any(str(item).startswith("Pickaxe Lvl") for item in u["inventory"]):
+        u["inventory"].append("Pickaxe Lvl 1")
+
     return u
 
-# =========================
-# PICKAXE SYSTEM
-# =========================
 def get_pickaxe_tier(u):
-    inv = u["inventory"]
+    inv = u.get("inventory", [])
     for i in range(5, 0, -1):
         if f"Pickaxe Lvl {i}" in inv:
             return i
-    return 0
+    return 1
 
-# =========================
-# STATS TABLE
-# =========================
 DURABILITY_TABLE = {
     1: 50,
     2: 200,
@@ -2595,14 +2587,26 @@ DURABILITY_TABLE = {
 }
 
 def get_max_durability(tier, level=1):
-    base = DURABILITY_TABLE.get(tier, 30)
+    base = DURABILITY_TABLE.get(tier, 50)
     return int(base * (1.015 ** level))
 
 def power_of(tier):
-    return {1:1.0, 2:1.8, 3:3.0, 4:5.5, 5:12.0}[tier]
+    return {
+        1: 1.0,
+        2: 1.8,
+        3: 3.0,
+        4: 5.5,
+        5: 12.0
+    }.get(tier, 1.0)
 
 def reward_mult(tier):
-    return {1:1.0, 2:1.2, 3:1.6, 4:2.2, 5:3.5}[tier]
+    return {
+        1: 1.0,
+        2: 1.2,
+        3: 1.6,
+        4: 2.2,
+        5: 3.5
+    }.get(tier, 1.0)
 
 def xp_need(level):
     return int(80 * (level ** 1.15) * (1.05 ** level))
@@ -2624,147 +2628,249 @@ def roll_cave_type():
     else:
         return "special"
 
-# =========================
-# BLOCK GENERATION
-# =========================
 def gen_block(x, y):
     rng = random.Random(f"{x}_{y}")
     roll = rng.random() * 100
 
     if y < 100:
-            if roll < 5:    b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
-            elif roll < 15: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
-            elif roll < 15.1:  b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
-            else:           b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
+        if roll < 5:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
+        elif roll < 15:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+        elif roll < 15.1:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
+        else:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
+
     elif y < 300:
-            if roll < 10:   b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
-            elif roll < 12: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
-            elif roll < 47: b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
-            elif roll < 57: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
-            elif roll < 57.1: b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
-            elif roll < 57.2: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
-            elif roll < 57.3: b = {"emoji": "🟥", "hp": 200, "coins": 0, "xp": 1}
-            elif roll < 57.4: b = {"emoji": "🟫", "hp": 100, "coins": 0, "xp": 1}
-            elif roll < 57.5: b = {"emoji": "🪨", "hp": 500, "coins": 0, "xp": 1}
-            elif roll < 57.51: b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Nodura": True}
-            elif roll < 57.61:   b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
-            elif roll < 57.71: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
-            else:           b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+        if roll < 10:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
+        elif roll < 12:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
+        elif roll < 47:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
+        elif roll < 57:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
+        elif roll < 57.1:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 57.2:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
+        elif roll < 57.3:
+            b = {"emoji": "🟥", "hp": 200, "coins": 0, "xp": 1}
+        elif roll < 57.4:
+            b = {"emoji": "🟫", "hp": 100, "coins": 0, "xp": 1}
+        elif roll < 57.5:
+            b = {"emoji": "🪨", "hp": 500, "coins": 0, "xp": 1}
+        elif roll < 57.51:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Nodura": True}
+        elif roll < 57.61:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
+        elif roll < 57.71:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
+        else:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+
     elif y < 500:
-            if roll < 0.5:    b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
-            elif roll < 1.5:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
-            elif roll < 13.5: b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
-            elif roll < 17.5: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
-            elif roll < 36: b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
-            elif roll < 55.95: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
-            elif roll < 56.05: b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
-            elif roll < 56.15: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
-            elif roll < 56.2: b = {"emoji": "🟥", "hp": 400, "coins": 0, "xp": 1}
-            elif roll < 56.25: b = {"emoji": "🟫", "hp": 200, "coins": 0, "xp": 1}
-            elif roll < 56.3: b = {"emoji": "🪨", "hp": 1000, "coins": 0, "xp": 1}
-            elif roll < 56.305: b = {"emoji": "🟥", "hp": 1, "coins": 0, "xp": 1, "Clear": True}
-            elif roll < 56.325:    b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
-            elif roll < 56.355:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90, "Lucky": True}
-            elif roll < 56.365: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Nodura": True}
-            elif roll < 56.465:   b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
-            elif roll < 56.565: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
-            else:           b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+        if roll < 0.5:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
+        elif roll < 1.5:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
+        elif roll < 13.5:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
+        elif roll < 17.5:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
+        elif roll < 36:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
+        elif roll < 55.95:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
+        elif roll < 56.05:
+            b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 56.15:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
+        elif roll < 56.2:
+            b = {"emoji": "🟥", "hp": 400, "coins": 0, "xp": 1}
+        elif roll < 56.25:
+            b = {"emoji": "🟫", "hp": 200, "coins": 0, "xp": 1}
+        elif roll < 56.3:
+            b = {"emoji": "🪨", "hp": 1000, "coins": 0, "xp": 1}
+        elif roll < 56.305:
+            b = {"emoji": "🟥", "hp": 1, "coins": 0, "xp": 1, "Clear": True}
+        elif roll < 56.325:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
+        elif roll < 56.355:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90, "Lucky": True}
+        elif roll < 56.365:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Nodura": True}
+        elif roll < 56.465:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
+        elif roll < 56.565:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
+        else:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+
     elif y < 1000:
-            if roll < 0.05: b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500}
-            elif roll < 0.15:  b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800}
-            elif roll < 1.15:  b = {"emoji": "💰", "hp": 1, "coins": random.randint(250,500), "xp": 0}
-            elif roll < 2.15:  b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
-            elif roll < 4.15:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
-            elif roll < 14.15: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
-            elif roll < 29.15: b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
-            elif roll < 59.15: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
-            elif roll < 59.25: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Explosion": True}
-            elif roll < 59.35: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
-            elif roll < 59.4: b = {"emoji": "🟥", "hp": 800, "coins": 0, "xp": 1}
-            elif roll < 59.45: b = {"emoji": "🪨", "hp": 1600, "coins": 0, "xp": 1}
-            elif roll < 59.455: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Clear": True}
-            elif roll < 59.485:    b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
-            elif roll < 59.505:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90, "Lucky": True}
-            elif roll < 59.506:    b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500, "Lucky": True}
-            elif roll < 59.508:  b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800, "Lucky": True}
-            elif roll < 59.518: b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Nodura": True}
-            elif roll < 59.618:   b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
-            elif roll < 59.718: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
-            else:             b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+        if roll < 0.05:
+            b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500}
+        elif roll < 0.15:
+            b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800}
+        elif roll < 1.15:
+            b = {"emoji": "💰", "hp": 1, "coins": random.randint(250, 500), "xp": 0}
+        elif roll < 2.15:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
+        elif roll < 4.15:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
+        elif roll < 14.15:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
+        elif roll < 29.15:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
+        elif roll < 59.15:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
+        elif roll < 59.25:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 59.35:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Chest": True}
+        elif roll < 59.4:
+            b = {"emoji": "🟥", "hp": 800, "coins": 0, "xp": 1}
+        elif roll < 59.45:
+            b = {"emoji": "🪨", "hp": 1600, "coins": 0, "xp": 1}
+        elif roll < 59.455:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Clear": True}
+        elif roll < 59.485:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
+        elif roll < 59.505:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90, "Lucky": True}
+        elif roll < 59.506:
+            b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500, "Lucky": True}
+        elif roll < 59.508:
+            b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800, "Lucky": True}
+        elif roll < 59.518:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1, "Nodura": True}
+        elif roll < 59.618:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
+        elif roll < 59.718:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
+        else:
+            b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
+
     elif y < 2000:
-            if roll < 0.00005: b = {"emoji": "💠", "hp": 8000, "coins": 0, "xp": 0, "Special": True}
-            elif roll < 0.01: b = {"emoji": "🏺", "hp": 2400, "coins": 15000, "xp": 5000}
-            elif roll < 0.03: b = {"emoji": "🌀", "hp": 1500, "coins": 8000, "xp": 2250}
-            elif roll < 0.08: b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500}
-            elif roll < 0.18:  b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800}
-            elif roll < 1.18:  b = {"emoji": "💰", "hp": 1, "coins": random.randint(250,500), "xp": 0}
-            elif roll < 2.18:  b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
-            elif roll < 4.18:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
-            elif roll < 14.18: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
-            elif roll < 39.18: b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
-            elif roll < 39.28: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Explosion": True}
-            elif roll < 39.33: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Chest": True}
-            elif roll < 39.38: b = {"emoji": "🪨", "hp": 3200, "coins": 0, "xp": 1}
-            elif roll < 39.385: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Clear": True}
-            elif roll < 39.405:    b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
-            elif roll < 39.435:  b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp":90, "Lucky": True}
-            elif roll < 39.4352:    b = {"emoji": "🏺", "hp": 2400, "coins": 15000, "xp": 5000, "Lucky": True}
-            elif roll < 39.4356:  b = {"emoji": "🌀", "hp": 1500, "coins": 8000, "xp": 2250, "Lucky": True}
-            elif roll < 39.4366:    b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500, "Lucky": True}
-            elif roll < 39.4386:  b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800, "Lucky": True}
-            elif roll < 39.4486: b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Nodura": True}
-            elif roll < 39.5486:   b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
-            elif roll < 39.6486: b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
-            elif roll < 39.6496: b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave":True}
-            else:             b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
+        if roll < 0.00005:
+            b = {"emoji": "💠", "hp": 8000, "coins": 0, "xp": 0, "Special": True}
+        elif roll < 0.01:
+            b = {"emoji": "🏺", "hp": 2400, "coins": 15000, "xp": 5000}
+        elif roll < 0.03:
+            b = {"emoji": "🌀", "hp": 1500, "coins": 8000, "xp": 2250}
+        elif roll < 0.08:
+            b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500}
+        elif roll < 0.18:
+            b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800}
+        elif roll < 1.18:
+            b = {"emoji": "💰", "hp": 1, "coins": random.randint(250, 500), "xp": 0}
+        elif roll < 2.18:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400}
+        elif roll < 4.18:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90}
+        elif roll < 14.18:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25}
+        elif roll < 39.18:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10}
+        elif roll < 39.28:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 39.33:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Chest": True}
+        elif roll < 39.38:
+            b = {"emoji": "🪨", "hp": 3200, "coins": 0, "xp": 1}
+        elif roll < 39.385:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Clear": True}
+        elif roll < 39.405:
+            b = {"emoji": "💎", "hp": 150, "coins": 800, "xp": 400, "Lucky": True}
+        elif roll < 39.435:
+            b = {"emoji": "🌟", "hp": 60, "coins": 250, "xp": 90, "Lucky": True}
+        elif roll < 39.4352:
+            b = {"emoji": "🏺", "hp": 2400, "coins": 15000, "xp": 5000, "Lucky": True}
+        elif roll < 39.4356:
+            b = {"emoji": "🌀", "hp": 1500, "coins": 8000, "xp": 2250, "Lucky": True}
+        elif roll < 39.4366:
+            b = {"emoji": "💜", "hp": 900, "coins": 6000, "xp": 1500, "Lucky": True}
+        elif roll < 39.4386:
+            b = {"emoji": "🔵", "hp": 600, "coins": 3000, "xp": 800, "Lucky": True}
+        elif roll < 39.4486:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1, "Nodura": True}
+        elif roll < 39.5486:
+            b = {"emoji": "◼️", "hp": 8, "coins": 25, "xp": 10, "Lucky": True}
+        elif roll < 39.6486:
+            b = {"emoji": "🔘", "hp": 15, "coins": 50, "xp": 25, "Lucky": True}
+        elif roll < 39.6496:
+            b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave": True}
+        else:
+            b = {"emoji": "🪨", "hp": 5, "coins": 0, "xp": 1}
+
     else:
-            if roll < 0.00005: b = {"emoji": "💠", "hp": 16000, "coins": 0, "xp": 0, "Special": True}
-            elif roll < 0.01: b = {"emoji": "🏺", "hp": 4800, "coins": 15000, "xp": 5000}
-            elif roll < 0.03: b = {"emoji": "🌀", "hp": 3000, "coins": 8000, "xp": 2250}
-            elif roll < 0.08: b = {"emoji": "💜", "hp": 1800, "coins": 6000, "xp": 1500}
-            elif roll < 0.18:  b = {"emoji": "🔵", "hp": 1200, "coins": 3000, "xp": 800}
-            elif roll < 1.18:  b = {"emoji": "💰", "hp": 1, "coins": random.randint(250,500), "xp": 0}
-            elif roll < 2.18:  b = {"emoji": "💎", "hp": 300, "coins": 800, "xp": 400}
-            elif roll < 4.18:  b = {"emoji": "🌟", "hp": 120, "coins": 250, "xp": 90}
-            elif roll < 14.18: b = {"emoji": "🔘", "hp": 30, "coins": 50, "xp": 25}
-            elif roll < 39.18: b = {"emoji": "◼️", "hp": 16, "coins": 25, "xp": 10}
-            elif roll < 39.28: b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Explosion": True}
-            elif roll < 39.33: b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Chest": True}
-            elif roll < 39.38: b = {"emoji": "🪨", "hp": 6400, "coins": 0, "xp": 1}
-            elif roll < 39.385: b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Clear": True}
-            elif roll < 39.405:    b = {"emoji": "💎", "hp": 300, "coins": 800, "xp": 400, "Lucky": True}
-            elif roll < 39.435:  b = {"emoji": "🌟", "hp": 120, "coins": 250, "xp":90, "Lucky": True}
-            elif roll < 39.4352:    b = {"emoji": "🏺", "hp": 4800, "coins": 15000, "xp": 5000, "Lucky": True}
-            elif roll < 39.4356:  b = {"emoji": "🌀", "hp": 3000, "coins": 8000, "xp": 2250, "Lucky": True}
-            elif roll < 39.4366:    b = {"emoji": "💜", "hp": 1800, "coins": 6000, "xp": 1500, "Lucky": True}
-            elif roll < 39.4386:  b = {"emoji": "🔵", "hp": 1200, "coins": 3000, "xp": 800, "Lucky": True}
-            elif roll < 39.4486: b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Nodura": True}
-            elif roll < 39.5486:   b = {"emoji": "◼️", "hp": 16, "coins": 25, "xp": 10, "Lucky": True}
-            elif roll < 39.6486: b = {"emoji": "🔘", "hp": 30, "coins": 50, "xp": 25, "Lucky": True}
-            elif roll < 39.6496: b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave":True}
-            else:             b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1}
+        if roll < 0.00005:
+            b = {"emoji": "💠", "hp": 16000, "coins": 0, "xp": 0, "Special": True}
+        elif roll < 0.01:
+            b = {"emoji": "🏺", "hp": 4800, "coins": 15000, "xp": 5000}
+        elif roll < 0.03:
+            b = {"emoji": "🌀", "hp": 3000, "coins": 8000, "xp": 2250}
+        elif roll < 0.08:
+            b = {"emoji": "💜", "hp": 1800, "coins": 6000, "xp": 1500}
+        elif roll < 0.18:
+            b = {"emoji": "🔵", "hp": 1200, "coins": 3000, "xp": 800}
+        elif roll < 1.18:
+            b = {"emoji": "💰", "hp": 1, "coins": random.randint(250, 500), "xp": 0}
+        elif roll < 2.18:
+            b = {"emoji": "💎", "hp": 300, "coins": 800, "xp": 400}
+        elif roll < 4.18:
+            b = {"emoji": "🌟", "hp": 120, "coins": 250, "xp": 90}
+        elif roll < 14.18:
+            b = {"emoji": "🔘", "hp": 30, "coins": 50, "xp": 25}
+        elif roll < 39.18:
+            b = {"emoji": "◼️", "hp": 16, "coins": 25, "xp": 10}
+        elif roll < 39.28:
+            b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 39.33:
+            b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Chest": True}
+        elif roll < 39.38:
+            b = {"emoji": "🪨", "hp": 6400, "coins": 0, "xp": 1}
+        elif roll < 39.385:
+            b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Clear": True}
+        elif roll < 39.405:
+            b = {"emoji": "💎", "hp": 300, "coins": 800, "xp": 400, "Lucky": True}
+        elif roll < 39.435:
+            b = {"emoji": "🌟", "hp": 120, "coins": 250, "xp": 90, "Lucky": True}
+        elif roll < 39.4352:
+            b = {"emoji": "🏺", "hp": 4800, "coins": 15000, "xp": 5000, "Lucky": True}
+        elif roll < 39.4356:
+            b = {"emoji": "🌀", "hp": 3000, "coins": 8000, "xp": 2250, "Lucky": True}
+        elif roll < 39.4366:
+            b = {"emoji": "💜", "hp": 1800, "coins": 6000, "xp": 1500, "Lucky": True}
+        elif roll < 39.4386:
+            b = {"emoji": "🔵", "hp": 1200, "coins": 3000, "xp": 800, "Lucky": True}
+        elif roll < 39.4486:
+            b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1, "Nodura": True}
+        elif roll < 39.5486:
+            b = {"emoji": "◼️", "hp": 16, "coins": 25, "xp": 10, "Lucky": True}
+        elif roll < 39.6486:
+            b = {"emoji": "🔘", "hp": 30, "coins": 50, "xp": 25, "Lucky": True}
+        elif roll < 39.6496:
+            b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave": True}
+        else:
+            b = {"emoji": "🪨", "hp": 10, "coins": 0, "xp": 1}
 
-    depth = y
-
-    if depth <= 5000:
+    if y <= 5000:
         hp_mult = 1
     else:
-        step = (depth - 5000) // 1000 + 1
-        r = 1.08
-        hp_mult = r ** step
-    
+        step = (y - 5000) // 1000 + 1
+        hp_mult = 1.08 ** step
+
     b["hp"] = int(b["hp"] * hp_mult)
-                
     b["max_hp"] = int(b["hp"])
     b["curr_hp"] = int(b["hp"])
     return b
 
 def get_block(x, y):
     key = f"{x},{y}"
-
     block = world.get(key)
 
-    # 👉 只有真的沒有才生成
     if block is None:
         if len(world) > WORLD_LIMIT:
             world.clear()
@@ -2774,14 +2880,11 @@ def get_block(x, y):
 
     return block
 
-# =========================
-# VIEW
-# =========================
 class MineView(discord.ui.View):
     def __init__(self, uid):
         super().__init__(timeout=None)
-        self.uid = uid
-        self.u = user_data[uid]
+        self.uid = str(uid)
+        self.u = user_data[self.uid]
         self.target = None
         self.locked = False
         self.log = "⛏️ Choose a direction to start mining."
@@ -2790,37 +2893,38 @@ class MineView(discord.ui.View):
         return max(0, self.u.get("max_depth", 0) - 8)
 
     def handle_cave_block(self, block):
-    
         earn = block.get("coins", 0)
-        log = f"✅ Broke {block.get('emoji','?')} !(+ {earn} coins)"
+        xp = block.get("xp", 0)
 
+        self.u["xp"] += xp
+
+        log = f"✅ Broke {block.get('emoji', '?')}! +{earn} coins / +{xp} XP"
         return earn, log
 
     def gen_cave(self):
-    
         grid = []
-    
+
         for y in range(10):
             row = []
             for x in range(6):
-    
+                hp = random.randint(1, 3)
+
                 b = {
                     "emoji": "🟫",
-                    "hp": random.randint(1, 3),
-                    "curr_hp": random.randint(1, 3),
-                    "max_hp": 3,
+                    "hp": hp,
+                    "curr_hp": hp,
+                    "max_hp": hp,
                     "coins": random.randint(500, 3000),
                     "xp": random.randint(300, 2000)
                 }
-    
+
                 row.append(b)
-    
+
             grid.append(row)
-    
+
         return grid
 
     def build(self):
-    
         tier = get_pickaxe_tier(self.u)
         lvl = self.u.get("level", 1)
         cam = self.cam()
@@ -2832,10 +2936,8 @@ class MineView(discord.ui.View):
             max_dur = 50
         else:
             max_dur = get_max_durability(tier, lvl)
-    
-        # ===== 地圖 =====
+
         if self.u.get("in_cave"):
-            grid = []
             for y in range(10):
                 row = []
                 for x in range(6):
@@ -2843,7 +2945,7 @@ class MineView(discord.ui.View):
                         row.append("⛏️")
                     else:
                         block = self.u["cave_grid"][y][x]
-                        if block.get("type") == "empty":
+                        if isinstance(block, dict) and block.get("type") == "empty":
                             row.append("⬜️")
                         else:
                             row.append("🟫")
@@ -2857,56 +2959,39 @@ class MineView(discord.ui.View):
                     else:
                         row.append(get_block(x, y)["emoji"])
                 grid.append(" ".join(row) + f"   {y:>4}m")
-    
-        # ===== 傷害 =====
-    
+
         if self.u.get("in_cave"):
             display_damage = 1
         else:
             base_damage = power_of(tier)
             display_damage = round(base_damage * (1.035 ** lvl), 1)
-    
-        # ===== XP =====
-    
+
         need = xp_need(lvl)
         xp = self.u["xp"]
         fill = int(min(10, xp / need * 10))
         bar = "▰" * fill + "▱" * (10 - fill)
-        
-        # ===== durability 狀態（修理顯示在這）=====
 
         if self.u.get("repairing"):
             remain = max(0, int(self.u["repair_end"] - time.time()))
             dur_text = f"🔧 Repairing... {remain//60:02d}:{remain%60:02d}"
         else:
-            dur_text = f"🔋Durability: {self.u['durability']}/{max_dur}"
-    
-        # ===== log（事件）=====
-    
-        log = self.log if hasattr(self, "log") else "⛏️ Choose a direction to start mining."
-        # 👉 挖礦中顯示血條（但不影響 repair)
+            dur_text = f"🔋 Durability: {self.u['durability']}/{max_dur}"
+
+        log = self.log
+
         if self.target and not self.u.get("repairing"):
             t = self.target
-            hp_ratio = t["curr_hp"] / t["max_hp"]
+            hp_ratio = t["curr_hp"] / t["max_hp"] if t["max_hp"] > 0 else 0
             hbar = "▰" * int(hp_ratio * 10) + "▱" * (10 - int(hp_ratio * 10))
             log = f"⛏️ {t['emoji']} {hbar} ({int(t['curr_hp'])}/{t['max_hp']})"
-    
-        # ===== embed =====
-    
-        if self.u.get("in_cave"):
-            embed = discord.Embed(title="🕳️ Cave Simulator", color=0x8B4513)  # 棕色（洞穴感）
-        else:
-            embed = discord.Embed(title="⛏️ Mining Simulator", color=0x2b2d31)
 
-        # ⭐ 上方文字切換
         if self.u.get("in_cave"):
+            embed = discord.Embed(title="🕳️ Cave Simulator", color=0x8B4513)
             top_text = f"🕳️ Broke blocks: {self.u.get('cave_broken', 0)}\n"
-        else:
-            top_text = f"⛏️ Depth: {self.u['mine_depth']}m\n"
-
-        if self.u.get("in_cave"):
             mining_title = "🕳️ Cave\n"
         else:
+            embed = discord.Embed(title="⛏️ Mining Simulator", color=0x2b2d31)
+            top_text = f"⛏️ Depth: {self.u['mine_depth']}m\n"
             mining_title = "⛏️ Mining\n"
 
         embed.description = (
@@ -2917,8 +3002,6 @@ class MineView(discord.ui.View):
             + mining_title +
             f"{log}"
         )
-    
-        # ===== Stats =====
 
         if self.u.get("in_cave"):
             money_line = f"💰 Total Earn: {self.u.get('cave_earn', 0)} 🪙\n"
@@ -2935,108 +3018,103 @@ class MineView(discord.ui.View):
             ),
             inline=False
         )
-    
-        # ===== Level =====
-    
+
         embed.add_field(
             name="Level",
             value=f"Mining Level {lvl}",
             inline=False
         )
-    
+
         return embed
 
     async def repair_loop(self, message):
         while self.u.get("repairing"):
-            remain = int(self.u["repair_end"] - time.time())
-            remain = max(0, remain)
-    
+            remain = max(0, int(self.u["repair_end"] - time.time()))
+
             if remain <= 0:
                 self.u["repairing"] = False
-    
+
                 lvl = self.u.get("level", 1)
                 self.u["durability"] = get_max_durability(
                     get_pickaxe_tier(self.u), lvl
                 )
-    
-                # ✅ 只在完成時寫 log
+
                 self.log = "🔧 Repair completed!"
-    
+
                 try:
                     await message.edit(embed=self.build(), view=self)
                 except:
                     return
-    
+
                 save_data()
                 return
-    
-            # ❌ 不要再改 log（很重要）
-            # repairing 狀態已經在 durability 顯示
-    
+
             try:
                 await message.edit(embed=self.build(), view=self)
             except:
                 return
-    
+
             await asyncio.sleep(1)
 
     async def move_cave(self, dx, dy, i):
-    
         if self.u["durability"] <= 0:
             return await i.response.send_message(
                 "❌ Durability is 0, press leave",
                 ephemeral=True
             )
-    
+
         tx = max(0, min(5, self.u["cave_px"] + dx))
         ty = max(0, min(9, self.u["cave_py"] + dy))
-    
+
         grid = self.u["cave_grid"]
         block = grid[ty][tx]
-        
-        if not isinstance(block, dict) or "curr_hp" not in block:
-            # ⭐ 允許移動
+
+        if not isinstance(block, dict) or block.get("type") == "empty":
             self.u["cave_px"] = tx
             self.u["cave_py"] = ty
+            self.log = "Idle"
 
-            self.log = f"Idle"
-        
             return await i.response.edit_message(
                 embed=self.build(),
                 view=CaveView(self)
             )
-    
-        damage = 1  # power固定1
-    
+
+        damage = 1
+
         block["curr_hp"] -= damage
         self.u["durability"] -= 1
-    
+
         if block["curr_hp"] > 0:
             self.target = block
             self.log = "⛏️ Mining..."
-            return await i.response.edit_message(embed=self.build(), view=CaveView(self))
-    
+            return await i.response.edit_message(
+                embed=self.build(),
+                view=CaveView(self)
+            )
+
         earn, log = self.handle_cave_block(block)
-    
+
         self.u["cave_earn"] += earn
         self.u["cave_broken"] += 1
-    
+
         grid[ty][tx] = {"type": "empty"}
         self.target = None
-    
+
         self.u["cave_px"] = tx
         self.u["cave_py"] = ty
-    
+
         self.log = log
-    
-        return await i.response.edit_message(embed=self.build(), view=CaveView(self))
+        save_data()
+
+        return await i.response.edit_message(
+            embed=self.build(),
+            view=CaveView(self)
+        )
 
     async def move(self, dx, dy, i):
-
         if self.u.get("in_cave"):
             return await self.move_cave(dx, dy, i)
 
-        # 🔧 DURABILITY CHECK (FIX)
         if self.u["durability"] <= 0 and not self.u.get("repairing", False):
             return await i.response.send_message(
                 "🔧 Your pickaxe is broken! Repair it first.",
@@ -3044,32 +3122,35 @@ class MineView(discord.ui.View):
             )
 
         if self.u.get("repairing"):
-            return await i.response.send_message("🔧 Repairing your pickaxe...", ephemeral=True)
+            return await i.response.send_message(
+                "🔧 Repairing your pickaxe...",
+                ephemeral=True
+            )
 
         if self.locked:
             return
+
         self.locked = True
 
         try:
             tx = max(0, min(5, self.u["mine_px"] + dx))
-            ty = self.u["mine_depth"] + dy
+            ty = max(0, self.u["mine_depth"] + dy)
 
             block = get_block(tx, ty)
             tier = get_pickaxe_tier(self.u)
 
-            if tier == 0:
-                return await i.response.send_message("❌ You don't have a pickaxe yet! Do /shop to buy one.", ephemeral=True)
-
             lvl = self.u.get("level", 1)
             level_mult = 1.035 ** lvl
-            damage = int(power_of(tier) * level_mult)
+            damage = max(1, int(power_of(tier) * level_mult))
 
+            # ✅ 空白格只移動，不繼續挖，避免 interaction 重複回應
             if block["emoji"] == "⬜️":
                 self.u["mine_px"] = tx
                 self.u["mine_depth"] = ty
                 self.target = None
-                self.log = f"Idle"
-                await i.response.edit_message(embed=self.build(), view=self)
+                self.log = "Idle"
+                save_data()
+                return await i.response.edit_message(embed=self.build(), view=self)
 
             before = block["curr_hp"]
             block["curr_hp"] = max(0, before - damage)
@@ -3079,9 +3160,9 @@ class MineView(discord.ui.View):
 
             if block["curr_hp"] > 0:
                 self.target = block
-                save_data()
                 self.log = f"⛏️ Mining {block['emoji']}"
-                
+                save_data()
+
                 return await i.response.edit_message(
                     embed=self.build(),
                     view=self
@@ -3097,91 +3178,119 @@ class MineView(discord.ui.View):
                 depth_mult = 1
             else:
                 step = (depth - 2000) // 1000 + 1
-                r = 1.2  # 每1000層+20%指數成長
-                depth_mult = r ** step
+                depth_mult = 1.2 ** step
+
             lvl = self.u.get("level", 1)
-            event_block = any(block.get(k) for k in [
-                "Explosion", "Clear", "Lucky", "Chest", "Nodura", "Special"
-            ])
 
             if block.get("Explosion"):
                 msg = "💥 Explosion triggered!"
-            
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        nx, ny = tx + dx, ty + dy
+
+                for ex in [-1, 0, 1]:
+                    for ey in [-1, 0, 1]:
+                        nx, ny = tx + ex, ty + ey
+                        if ny < 0:
+                            continue
+
                         nb = get_block(nx, ny)
-            
+
                         gain_c = nb.get("coins", 0)
                         gain_x = nb.get("xp", 0)
-            
+
                         self.u["sack"] += int(gain_c * mult)
                         self.u["xp"] += int(gain_x * mult)
-            
-                        world[f"{nx},{ny}"] = {"emoji": "⬜️", "hp": 0, "curr_hp": 0, "max_hp": 0}
+
+                        world[f"{nx},{ny}"] = {
+                            "emoji": "⬜️",
+                            "hp": 0,
+                            "curr_hp": 0,
+                            "max_hp": 0,
+                            "coins": 0,
+                            "xp": 0
+                        }
+
             elif block.get("Nodura"):
                 self.u["durability"] = 0
                 msg = "☠️ Nodura activated! Durability wiped!"
+
             elif block.get("Chest"):
                 gain = random.randint(200, 500)
                 self.u["sack"] += gain
                 msg = f"🎁 Chest found! +{gain} coins"
+
             elif block.get("Clear"):
                 msg = "🌪 Clear activated!"
-            
+
                 for x in range(6):
                     nb = get_block(x, ty)
                     self.u["sack"] += int(nb.get("coins", 0) * mult)
                     self.u["xp"] += int(nb.get("xp", 0) * mult)
-            
-                    world[f"{x},{ty}"] = {"emoji": "⬜️", "hp": 0, "curr_hp": 0, "max_hp": 0}
+
+                    world[f"{x},{ty}"] = {
+                        "emoji": "⬜️",
+                        "hp": 0,
+                        "curr_hp": 0,
+                        "max_hp": 0,
+                        "coins": 0,
+                        "xp": 0
+                    }
+
             elif block.get("Lucky"):
                 mult2 = random.randint(1, 10)
                 msg = f"🍀 Lucky x{mult2}!"
-            
+
                 self.u["sack"] += int(coins * mult * mult2)
                 self.u["xp"] += int(xp * mult * mult2)
+
             elif block.get("Special"):
                 self.u.setdefault("inventory", [])
                 self.u["inventory"].append("💠 Crystal")
                 msg = "💠 Crystal obtained!"
+
             elif block.get("Cave"):
                 msg = "🕳 You fell into a cave!"
-            
-                # ===== 進入洞穴 =====
+
                 self.u["in_cave"] = True
-            
                 self.u["cave_type"] = roll_cave_type()
                 self.u["cave_grid"] = self.gen_cave()
-            
+
                 self.u["cave_px"] = 2
                 self.u["cave_py"] = 5
-            
+
                 self.u["cave_earn"] = 0
                 self.u["cave_broken"] = 0
-            
-                # 強制設定
                 self.u["durability"] = 50
-            
+
                 self.target = None
                 self.log = msg
-            
-                # ❗清掉入口（避免重複進入）
-                world[f"{tx},{ty}"] = {"emoji":"⬜️","hp":0,"curr_hp":0,"max_hp":0}
-            
+
+                world[f"{tx},{ty}"] = {
+                    "emoji": "⬜️",
+                    "hp": 0,
+                    "curr_hp": 0,
+                    "max_hp": 0,
+                    "coins": 0,
+                    "xp": 0
+                }
+
                 save_data()
 
                 return await i.response.edit_message(
                     embed=self.build(),
                     view=CaveView(self)
                 )
-               
 
-            self.u["sack"] += int(coins * mult * depth_mult)
-            self.u["xp"] += int(xp * mult * depth_mult * (1.03 ** lvl))
+            else:
+                self.u["sack"] += int(coins * mult * depth_mult)
+                self.u["xp"] += int(xp * mult * depth_mult * (1.03 ** lvl))
 
-            world[f"{tx},{ty}"] = {"emoji":"⬜️","hp":0,"curr_hp":0,"max_hp":0}
-            save_data()
+            world[f"{tx},{ty}"] = {
+                "emoji": "⬜️",
+                "hp": 0,
+                "curr_hp": 0,
+                "max_hp": 0,
+                "coins": 0,
+                "xp": 0
+            }
 
             self.u["mine_px"] = tx
             self.u["mine_depth"] = ty
@@ -3190,6 +3299,7 @@ class MineView(discord.ui.View):
             while True:
                 lvl = self.u.get("level", 1)
                 need = xp_need(lvl)
+
                 if self.u["xp"] >= need:
                     self.u["xp"] -= need
                     self.u["level"] = lvl + 1
@@ -3198,41 +3308,49 @@ class MineView(discord.ui.View):
 
             self.target = None
             self.log = msg
-            await i.response.edit_message(embed=self.build(), view=self)
+
+            save_data()
+            return await i.response.edit_message(embed=self.build(), view=self)
 
         finally:
             self.locked = False
 
     async def leave_cave(self, i):
-    
-        total = self.u["cave_earn"]
-    
+        total = self.u.get("cave_earn", 0)
+
         self.u["sack"] += total
         self.u["in_cave"] = False
         self.u["cave_grid"] = None
         self.u["cave_earn"] = 0
+
         tier = get_pickaxe_tier(self.u)
         lvl = self.u.get("level", 1)
         self.u["durability"] = get_max_durability(tier, lvl)
-    
-        self.log = f"🕳 Earned {total} !"
-    
+
+        self.log = f"🕳 Earned {total}!"
+
+        save_data()
+
         return await i.response.edit_message(
             embed=self.build(),
-            view=MineView(self.uid)
+            view=self
         )
 
     @discord.ui.button(label="⬆️")
-    async def up(self, i, b): await self.move(0, -1, i)
+    async def up(self, i, b):
+        await self.move(0, -1, i)
 
     @discord.ui.button(label="⬅️")
-    async def left(self, i, b): await self.move(-1, 0, i)
+    async def left(self, i, b):
+        await self.move(-1, 0, i)
 
     @discord.ui.button(label="⬇️")
-    async def down(self, i, b): await self.move(0, 1, i)
+    async def down(self, i, b):
+        await self.move(0, 1, i)
 
     @discord.ui.button(label="➡️")
-    async def right(self, i, b): await self.move(1, 0, i)
+    async def right(self, i, b):
+        await self.move(1, 0, i)
 
     @discord.ui.button(label="💰 SELL")
     async def sell(self, i, b):
@@ -3240,81 +3358,80 @@ class MineView(discord.ui.View):
         u["coins"] += u["sack"]
         u["sack"] = 0
         self.log = "💰 Sold items"
-        await i.response.edit_message(embed=self.build(), view=self)
         save_data()
+        await i.response.edit_message(embed=self.build(), view=self)
 
     @discord.ui.button(label="🔧 REPAIR")
     async def repair(self, i, b):
         u = self.u
-    
+
         if u["repairing"]:
             u["repairing"] = False
             u["repair_end"] = 0
             self.log = "❌ Repair canceled"
+            save_data()
             return await i.response.edit_message(embed=self.build(), view=self)
-    
+
         if u["coins"] < 500:
-            return await i.response.send_message("❌ Not enough coins", ephemeral=True)
-    
+            return await i.response.send_message(
+                "❌ Not enough coins",
+                ephemeral=True
+            )
+
         u["coins"] -= 500
         u["repairing"] = True
+
         lvl = u.get("level", 1)
         u["repair_end"] = time.time() + repair_time(lvl)
-    
+
         self.log = "🔧 Started repairing!"
-        await i.response.edit_message(embed=self.build(), view=self)
-    
-        # ⭐ 這行才是關鍵修復
-        msg = await i.original_response()
-    
-        asyncio.create_task(self.repair_loop(msg))
-    
         save_data()
+
+        await i.response.edit_message(embed=self.build(), view=self)
+
+        msg = await i.original_response()
+        asyncio.create_task(self.repair_loop(msg))
+
 
 class CaveView(discord.ui.View):
     def __init__(self, parent):
         super().__init__(timeout=None)
-        self.parent = parent  # 指向原本 MineView
+        self.parent = parent
 
-    # ⬆️
     @discord.ui.button(label="⬆️", style=discord.ButtonStyle.secondary)
     async def up(self, i, b):
         await self.parent.move_cave(0, -1, i)
-    
-    # ⬅️
+
     @discord.ui.button(label="⬅️", style=discord.ButtonStyle.secondary)
     async def left(self, i, b):
         await self.parent.move_cave(-1, 0, i)
 
-    # ⬇️
     @discord.ui.button(label="⬇️", style=discord.ButtonStyle.secondary)
     async def down(self, i, b):
         await self.parent.move_cave(0, 1, i)
 
-    # ➡️
     @discord.ui.button(label="➡️", style=discord.ButtonStyle.secondary)
     async def right(self, i, b):
         await self.parent.move_cave(1, 0, i)
 
-    # 🚪 leave
     @discord.ui.button(label="🚪 LEAVE", style=discord.ButtonStyle.danger)
     async def leave(self, i, b):
         await self.parent.leave_cave(i)
-        
-# =========================
-# COMMAND
-# =========================
+
+
 @tree.command(name="mine", description="Mining Game")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def mine(interaction: discord.Interaction):
-
     uid = str(interaction.user.id)
     init_user(uid)
 
     view = MineView(uid)
     active_games[uid] = view
 
-    await interaction.response.send_message(embed=view.build(), view=view)
+    await interaction.response.send_message(
+        embed=view.build(),
+        view=view
+    )
 
 # @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 
