@@ -3166,7 +3166,7 @@ class MineView(discord.ui.View):
                             "type": "empty"
                         }
                     
-                        return earn, log
+        return earn, log
 
     def gen_cave(self):
     
