@@ -88,8 +88,15 @@ async def auto_backup_loop():
         await asyncio.sleep(3)
 
 def upload_to_github():
+    if not GITHUB_TOKEN:
+        print("❌ GITHUB_TOKEN is missing")
+        return False
 
     try:
+        if not os.path.exists(DATA_FILE):
+            print("❌ Local users.json not found, cannot upload")
+            return False
+
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             content = f.read()
 
@@ -100,41 +107,56 @@ def upload_to_github():
         api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}"
 
         headers = {
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
+            "Authorization": f"Bearer {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
         }
 
-        # 取得 sha（GitHub 更新檔案需要）
-        r = requests.get(api_url, headers=headers)
+        # 先取得目前 GitHub 上 users.json 的 sha
+        get_response = requests.get(
+            api_url,
+            headers=headers,
+            params={"ref": BRANCH},
+            timeout=15
+        )
 
-        sha = None
-        if r.status_code == 200:
-            sha = r.json()["sha"]
+        print("GET STATUS:", get_response.status_code)
 
-        data = {
+        if get_response.status_code == 200:
+            sha = get_response.json().get("sha")
+        else:
+            print("❌ Failed to get file SHA")
+            print(get_response.text)
+            return False
+
+        payload = {
             "message": "Auto save users.json",
             "content": encoded_content,
+            "sha": sha,
             "branch": BRANCH
         }
 
-        if sha:
-            data["sha"] = sha
-
-        response = requests.put(
+        put_response = requests.put(
             api_url,
             headers=headers,
-            json=data
+            json=payload,
+            timeout=15
         )
 
-        if response.status_code in [200, 201]:
+        print("UPLOAD STATUS:", put_response.status_code)
+        print(put_response.text)
+
+        if put_response.status_code in [200, 201]:
             print("✅ Uploaded users.json to GitHub")
+            return True
         else:
             print("❌ GitHub upload failed")
-            print(response.text)
+            return False
 
     except Exception as e:
         print(f"❌ GitHub upload error: {e}")
-
+        return False
+        
 def save_data():
     try:
         # 確保 /data 存在
