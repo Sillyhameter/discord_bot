@@ -9,6 +9,7 @@ import time
 import requests
 from colorama import Fore, init  # ← This was missing!
 from discord.ext import commands
+backup_started = False
 flow_tracker = {}
 TRIVIA_HISTORY = collections.deque(maxlen=80)
 init(autoreset=True)  # ← Required for Windows color support
@@ -620,14 +621,21 @@ def get_help_dict(uid):
 # ==========================================
 @bot.event
 async def on_ready():
+    global backup_started
+
     load_data()
     print(f'{bot.user} is online! Data loaded.')
+
+    if not backup_started:
+        bot.loop.create_task(auto_backup_loop())
+        backup_started = True
+        print("☁️ Auto backup loop started")
+
     try:
         await tree.sync()
         print("Commands synced successfully!")
     except Exception as e:
         print(f"Sync failed: {e}")
-
 
 # ==========================================
 # HELP & SETTINGS COMMANDS
