@@ -85,7 +85,7 @@ async def auto_backup_loop():
         except Exception as e:
             print(f"❌ Auto backup error: {e}")
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(60)
 
 def upload_to_github():
     if not GITHUB_TOKEN:
