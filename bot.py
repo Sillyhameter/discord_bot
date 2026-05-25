@@ -152,50 +152,43 @@ def load_data():
     os.makedirs("/data", exist_ok=True)
 
     if not os.path.exists(DATA_FILE):
-        print("⚠️ users.json not found in /data. Attempting to download from GitHub...")
+        print("⚠️ users.json not found in /data. Downloading from GitHub...")
+
         try:
             github_url = "https://raw.githubusercontent.com/Sillyhameter/discord_bot_data/main/users.json"
-
-            response = requests.get(github_url)
+            response = requests.get(github_url, timeout=10)
 
             if response.status_code == 200:
                 with open(DATA_FILE, "wb") as f:
                     f.write(response.content)
-                print("✅ Successfully downloaded users.json from GitHub!")
+                print("✅ Downloaded users.json from GitHub")
             else:
-                print(f"❌ Failed to download from GitHub. Status: {response.status_code}")
+                print(f"❌ GitHub download failed: {response.status_code}")
+                print(response.text)
+                raise RuntimeError("Cannot start safely: users.json download failed")
+
         except Exception as e:
             print(f"❌ Error downloading data: {e}")
+            raise RuntimeError("Cannot start safely: no local users.json and GitHub download failed")
 
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-            user_data = data.get("users", {})
-            lottery_pool = data.get("lottery", {"tickets": [], "pot": 0})
-            world = data.get("world", {})
+        user_data = data.get("users", {})
+        lottery_pool = data.get("lottery", {"tickets": [], "pot": 0})
+        world = data.get("world", {})
 
-            # ✅ 一次修復所有舊玩家資料
-            for uid in list(user_data.keys()):
-                init_user(uid)
+        for uid in list(user_data.keys()):
+            init_user(uid)
 
-            save_data()
-
-            print(f"✅ Loaded data for {len(user_data)} users.")
-
-        except Exception as e:
-            print(f"❌ Error loading data: {e}")
-            user_data = {}
-            lottery_pool = {"tickets": [], "pot": 0}
-            world = {}
-            save_data()
-    else:
-        print("⚠️ No data file found. Starting with empty data.")
-        user_data = {}
-        lottery_pool = {"tickets": [], "pot": 0}
-        world = {}
         save_data()
+
+        print(f"✅ Loaded data for {len(user_data)} users.")
+
+    except Exception as e:
+        print(f"❌ Error loading data: {e}")
+        raise RuntimeError("Cannot start safely: users.json is broken")
 
 def init_user(user_id):
     uid = str(user_id)
