@@ -75,6 +75,18 @@ REPO_NAME = "discord_bot_data"
 FILE_PATH = "users.json"
 BRANCH = "main"
 
+async def auto_backup_loop():
+    await bot.wait_until_ready()
+
+    while not bot.is_closed():
+        try:
+            upload_to_github()
+            print("☁️ Auto backup complete")
+        except Exception as e:
+            print(f"❌ Auto backup error: {e}")
+
+        await asyncio.sleep(3)
+
 def upload_to_github():
 
     try:
