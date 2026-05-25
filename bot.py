@@ -3134,8 +3134,39 @@ class MineView(discord.ui.View):
     
             else:
                 log += " | 💥 Explosion!"
-    
-        return earn, log
+                for ex in [-1, 0, 1]:
+                    for ey in [-1, 0, 1]:
+                
+                        nx = self.u["cave_px"] + ex
+                        ny = self.u["cave_py"] + ey
+                
+                        if nx < 0 or nx > 5 or ny < 0 or ny > 9:
+                            continue
+                
+                        target = self.u["cave_grid"][ny][nx]
+                
+                        if not isinstance(target, dict):
+                            continue
+                
+                        if target.get("type") == "empty":
+                            continue
+                
+                        if target.get("claimed"):
+                            continue
+                
+                        target["claimed"] = True
+                
+                        gain_c = target.get("coins", 0)
+                        gain_x = target.get("xp", 0)
+                
+                        earn += gain_c
+                        self.u["xp"] += gain_x
+                
+                        self.u["cave_grid"][ny][nx] = {
+                            "type": "empty"
+                        }
+                    
+                        return earn, log
 
     def gen_cave(self):
     
