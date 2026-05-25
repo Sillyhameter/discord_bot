@@ -3085,12 +3085,56 @@ class MineView(discord.ui.View):
         return max(0, self.u.get("max_depth", 0) - 8)
 
     def handle_cave_block(self, block):
+    
+        if block.get("claimed"):
+            return 0, "⚠️ Already claimed."
+    
+        block["claimed"] = True
+    
         earn = block.get("coins", 0)
         xp = block.get("xp", 0)
-
+        effect = block.get("effect", "normal")
+    
         self.u["xp"] += xp
-
-        log = f"✅ Broke {block.get('emoji', '?')}! +{earn} coins / +{xp} XP"
+    
+        log = f"✅ Broke 🟫! +{earn} coins / +{xp} XP"
+    
+        if effect == "small":
+            r = random.random() * 100
+    
+            if r < 20:
+                self.u["durability"] = min(50, self.u["durability"] + 5)
+                log += " | 🔋 +5 durability"
+    
+            elif r < 35:
+                self.u["durability"] = max(0, self.u["durability"] - 5)
+                log += " | 🪫 -5 durability"
+    
+            elif r < 50:
+                bonus = int(self.u.get("cave_earn", 0) * 0.2)
+                self.u["cave_earn"] += bonus
+                log += f" | 📈 +20% reward (+{bonus})"
+    
+            elif r < 60:
+                loss = int(self.u.get("cave_earn", 0) * 0.2)
+                self.u["cave_earn"] = max(0, self.u.get("cave_earn", 0) - loss)
+                log += f" | 📉 -20% reward (-{loss})"
+    
+            elif r < 70:
+                need = xp_need(self.u.get("level", 1))
+                bonus_xp = need // 10
+                self.u["xp"] += bonus_xp
+                log += f" | ⭐ Experience bonus (+{bonus_xp} XP)"
+    
+            elif r < 95:
+                lucky = round(random.uniform(1.0, 5.0), 1)
+                extra = int(earn * (lucky - 1))
+                earn = int(earn * lucky)
+                log += f" | 🍀 Lucky x{lucky} (+{extra})"
+    
+            else:
+                log += " | 💥 Explosion!"
+    
         return earn, log
 
     def gen_cave(self):
@@ -3561,7 +3605,7 @@ class MineView(discord.ui.View):
         lvl = self.u.get("level", 1)
         self.u["durability"] = get_max_durability(tier, lvl)
 
-        self.log = f"🕳 Earned {total}!"
+        self.log = f"🕳 Earned {total} 🪙!"
 
         save_data()
 
