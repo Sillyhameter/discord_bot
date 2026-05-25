@@ -297,6 +297,22 @@ def parse_bet(user_id, bet_str):
     except ValueError:
         return 0
 
+@tree.command(name="forcebackup", description="Force backup to GitHub")
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+async def forcebackup(interaction: discord.Interaction):
+
+    try:
+        upload_to_github()
+        await interaction.response.send_message(
+            "☁️ Backup attempted. Check Railway logs.",
+            ephemeral=True
+        )
+    except Exception as e:
+        await interaction.response.send_message(
+            f"❌ Backup failed: {e}",
+            ephemeral=True
+        )
+
 # ==========================================
 # GLOBAL CAPTCHA SYSTEM (FIXED & SHORT-CIRCUITED)
 # ==========================================
