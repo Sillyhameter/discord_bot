@@ -2829,6 +2829,8 @@ def gen_block(x, y):
             b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
         elif roll < 15.1:
             b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
+        elif roll < 35.1:
+            b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave": True}
         else:
             b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
 
@@ -3092,11 +3094,11 @@ class MineView(discord.ui.View):
         return earn, log
 
     def gen_cave(self):
-
+    
         grid = []
-
+    
         cave_type = self.u.get("cave_type", "normal")
-
+    
         mult = {
             "poor": 0.75,
             "normal": 1.0,
@@ -3104,26 +3106,56 @@ class MineView(discord.ui.View):
             "chaos": 1.0,
             "special": 1.5
         }.get(cave_type, 1.0)
-
+    
         for y in range(10):
             row = []
             for x in range(6):
-
+    
                 hp = random.randint(1, 3)
-
+    
+                r = random.random() * 100
+    
+                if cave_type == "chaos":
+                    if r < 64:
+                        effect = "normal"
+                    elif r < 94:
+                        effect = "small"
+                    else:
+                        effect = "big"
+    
+                elif cave_type == "special":
+                    if r < 48:
+                        effect = "normal"
+                    elif r < 88:
+                        effect = "small"
+                    elif r < 98:
+                        effect = "big"
+                    else:
+                        effect = "bonus"
+    
+                else:
+                    if r < 70:
+                        effect = "normal"
+                    elif r < 95:
+                        effect = "small"
+                    else:
+                        effect = "big"
+    
                 b = {
                     "emoji": "🟫",
                     "hp": hp,
                     "curr_hp": hp,
                     "max_hp": hp,
                     "coins": int(random.randint(500, 3000) * mult),
-                    "xp": int(random.randint(300, 2000) * mult)
+                    "xp": int(random.randint(300, 2000) * mult),
+                    "effect": effect,
+                    "claimed": False
                 }
-
+    
                 row.append(b)
-
+    
             grid.append(row)
-
+    
         return grid
 
     def build(self):
