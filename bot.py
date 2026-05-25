@@ -3091,6 +3091,17 @@ class MineView(discord.ui.View):
 
     def cam(self):
         return max(0, self.u.get("max_depth", 0) - 8)
+        
+    def check_level_up(self):
+        while True:
+            lvl = self.u.get("level", 1)
+            need = xp_need(lvl)
+
+            if self.u["xp"] >= need:
+                self.u["xp"] -= need
+                self.u["level"] = lvl + 1
+            else:
+                break
 
     def handle_cave_block(self, block, bx=None, by=None):
     
@@ -3415,6 +3426,7 @@ class MineView(discord.ui.View):
 
         self.u["cave_earn"] += earn
         self.u["cave_broken"] += 1
+        self.check_level_up()
 
         grid[ty][tx] = {"type": "empty"}
         self.target = None
