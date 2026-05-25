@@ -3092,7 +3092,7 @@ class MineView(discord.ui.View):
     def cam(self):
         return max(0, self.u.get("max_depth", 0) - 8)
 
-    def handle_cave_block(self, block):
+    def handle_cave_block(self, block, bx=None, by=None):
     
         if block.get("claimed"):
             return 0, "⚠️ Already claimed."
@@ -3142,6 +3142,8 @@ class MineView(discord.ui.View):
     
             else:
                 log += " | 💥 Explosion!"
+                center_x = bx if bx is not None else self.u["cave_px"]
+                center_y = by if by is not None else self.u["cave_py"]
                 for ex in [-1, 0, 1]:
                     for ey in [-1, 0, 1]:
                 
@@ -3409,7 +3411,7 @@ class MineView(discord.ui.View):
                 view=CaveView(self)
             )
 
-        earn, log = self.handle_cave_block(block)
+        earn, log = self.handle_cave_block(block, tx, ty)
 
         self.u["cave_earn"] += earn
         self.u["cave_broken"] += 1
