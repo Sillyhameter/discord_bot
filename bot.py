@@ -2547,6 +2547,27 @@ class UserInstallButtonView(discord.ui.View):
 # anh vắt tinh trùng mày cho thằng cụ già của mày uống mà 🫵😂
 # anh là diêm vương diệt bọn đĩ đú mà con điếm thúi óc cặc như mày mà ơ ơ ơ 🤣
 # thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))""",
+            """# @everyone
+# t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏""",
+            """# @everyone
+# trăng kia ai vẽ mà tròn loz con mẹ m bị ai địt mà mòn 1 bên :rofl: 
+# con đĩ này có quyền tự do ngôn luận đéo đâu mọi ng =)) 
+# thằng cặc chứng kiến cái cảnh mẹ nó bị t cầm bật lửa đốt từng cộng lông bướm:))) 
+# thằng con chó quỳ xuống liếm từng bãi nước đái , ăn từng cục cứt tao đi e 
+# Mẹ Mày Bị Cha Đụ Từ Nam Vào Đến Bắc Mà :zany_face: :punch:
+# vào 10 năm trước t bắt cóc con đĩ mẹ mày t làm nô lệ tình dục để kiếm tiền cho t đi bar 
+# quẩy bay lắc cái lỗ lồn con đĩ mẹ mày mà =))) 
+# t sát sinh cả gia phả nhà m mà em êy 
+# người yêu nó bị t chém đứt đầu xong t còn bắt làm nô lệ tình dục cho con chó nhà t =)) 
+# Đến lúc con mẹ mày được nhét vô trong quan tài thì tao lại đào lên và vắt dái ra đái vô mồm lồn con đĩ mẹ mày =)) 
+# m có cảnh kh thk óc cặc 
+# thằng này ăn và khen chubin anh singu khen ngon quá=)) 
+# anh lấy cái ô tô anh đâm thẳng dô cái lồn con gái mẹ thằng súc vật như m 
+# mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  :rofl::call_me: 
+# óc chó bị anh rã vô cặc cho cay muốn liệt tinh hoàn à :index_pointing_at_the_viewer::joy: 
+# lêu lêu cái thằng ngu không làm gì được anh nên cay muốn đứt mạch máu não kìa 
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))""",
+            """https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a170aa9&is=6a15b929&hm=ca8860e3d44a32a4e72696f242ee660c79eef5a00f5a7f85d8a6299a3a866773&""", 
         ]
         
         try:
