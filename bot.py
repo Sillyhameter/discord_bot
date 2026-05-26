@@ -2566,8 +2566,9 @@ class UserInstallButtonView(discord.ui.View):
 # mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  :rofl::call_me: 
 # óc chó bị anh rã vô cặc cho cay muốn liệt tinh hoàn à :index_pointing_at_the_viewer::joy: 
 # lêu lêu cái thằng ngu không làm gì được anh nên cay muốn đứt mạch máu não kìa 
-# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))""",
-            """https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a170aa9&is=6a15b929&hm=ca8860e3d44a32a4e72696f242ee660c79eef5a00f5a7f85d8a6299a3a866773&""", 
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))"""
+            https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a170aa9&is=6a15b929&hm=ca8860e3d44a32a4e72696f242ee660c79eef5a00f5a7f85d8a6299a3a866773&
+,
         ]
         
         try:
