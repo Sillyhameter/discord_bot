@@ -786,7 +786,7 @@ def render_loot_grid(grid, items):
 
 class BigSafeHackTestView(discord.ui.View):
     def __init__(self, player):
-        super().__init__(timeout=120)
+        super().__init__(timeout=45)
 
         self.player = player
         self.code = generate_code()
@@ -809,6 +809,8 @@ class BigSafeHackTestView(discord.ui.View):
         self.loot_grid = None
         self.loot_items = None
         self.searching_loot = False
+
+        self.edit_lock = asyncio.Lock()
 
     def render_slot(self):
         def fmt_row(row, middle=False):
@@ -860,57 +862,71 @@ class BigSafeHackTestView(discord.ui.View):
             color=0xff3333 if self.failed else 0xffcc00
         )
 
+    async def safe_edit(self, *, embed=None, view=None):
+        if not self.message:
+            return
+
+        async with self.edit_lock:
+            try:
+                await self.message.edit(embed=embed, view=view)
+            except (discord.NotFound, discord.Forbidden):
+                if self.task:
+                    self.task.cancel()
+            except discord.HTTPException:
+                await asyncio.sleep(2)
+
     async def start_loop(self):
-        while not self.opened:
-            await asyncio.sleep(0.75)
+        try:
+            while not self.opened:
+                await asyncio.sleep(1.0)
 
-            if self.failed:
-                continue
-
-            self.tick += 1
-
-            new_top = []
-
-            for col in range(5):
-                if self.locked[col]:
-                    new_top.append(self.code[col])
+                if self.failed or self.searching_loot:
                     continue
 
-                if self.tick % 5 == 0:
-                    new_top.append(self.code[col])
-                else:
-                    new_top.append(random.choice(HACK_SYMBOLS))
+                self.tick += 1
 
-            old_top = self.rows[0][:]
-            old_mid = self.rows[1][:]
+                new_top = []
 
-            for col in range(5):
-                if self.locked[col]:
-                    self.rows[0][col] = self.code[col]
-                    self.rows[1][col] = self.code[col]
-                    self.rows[2][col] = self.code[col]
-                else:
-                    self.rows[0][col] = new_top[col]
-                    self.rows[1][col] = old_top[col]
-                    self.rows[2][col] = old_mid[col]
+                for col in range(5):
+                    if self.locked[col]:
+                        new_top.append(self.code[col])
+                    elif self.tick % 5 == 0:
+                        new_top.append(self.code[col])
+                    else:
+                        new_top.append(random.choice(HACK_SYMBOLS))
 
-            if self.message:
-                await self.message.edit(embed=self.build_embed(), view=self)
+                old_top = self.rows[0][:]
+                old_mid = self.rows[1][:]
+
+                for col in range(5):
+                    if self.locked[col]:
+                        self.rows[0][col] = self.code[col]
+                        self.rows[1][col] = self.code[col]
+                        self.rows[2][col] = self.code[col]
+                    else:
+                        self.rows[0][col] = new_top[col]
+                        self.rows[1][col] = old_top[col]
+                        self.rows[2][col] = old_mid[col]
+
+                await self.safe_edit(embed=self.build_embed(), view=self)
+
+        except asyncio.CancelledError:
+            pass
 
     async def reveal_loot_loop(self):
         self.searching_loot = True
         self.loot_grid, self.loot_items = generate_loot_grid()
 
-        await self.message.edit(embed=self.build_embed(), view=None)
+        await self.safe_edit(embed=self.build_embed(), view=None)
 
         for item in self.loot_items:
             item["state"] = "searching"
-            await self.message.edit(embed=self.build_embed(), view=None)
+            await self.safe_edit(embed=self.build_embed(), view=None)
 
             await asyncio.sleep(SEARCH_TIMES[item["size"]])
 
             item["state"] = "done"
-            await self.message.edit(embed=self.build_embed(), view=None)
+            await self.safe_edit(embed=self.build_embed(), view=None)
 
         self.searching_loot = False
 
@@ -945,7 +961,7 @@ class BigSafeHackTestView(discord.ui.View):
                 if self.task:
                     self.task.cancel()
 
-                await self.message.edit(
+                await self.safe_edit(
                     embed=discord.Embed(
                         title="大保險已開啟",
                         description="正在打開容器...",
@@ -956,14 +972,14 @@ class BigSafeHackTestView(discord.ui.View):
 
                 return await self.reveal_loot_loop()
 
-            return await self.message.edit(
+            return await self.safe_edit(
                 embed=self.build_embed(),
                 view=self
             )
 
         self.failed = True
 
-        await self.message.edit(
+        await self.safe_edit(
             embed=self.build_embed(),
             view=self
         )
@@ -972,7 +988,7 @@ class BigSafeHackTestView(discord.ui.View):
 
         self.failed = False
 
-        await self.message.edit(
+        await self.safe_edit(
             embed=self.build_embed(),
             view=self
         )
@@ -983,8 +999,7 @@ class BigSafeHackTestView(discord.ui.View):
 
         self.clear_items()
 
-        if self.message:
-            await self.message.edit(view=None)
+        await self.safe_edit(view=None)
 
 
 @tree.command(name="bigsafe_test", description="大保險破譯測試")
