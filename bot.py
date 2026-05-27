@@ -646,13 +646,17 @@ async def on_ready():
 HACK_SYMBOLS = list(string.ascii_uppercase + string.digits)
 
 ITEM_SIZE_WEIGHTS = [
-    ((1, 1), 55.5),
-    ((1, 2), 20),
-    ((2, 1), 10),
-    ((2, 2), 5),
-    ((2, 3), 4.5),
-    ((3, 2), 4.5),
-    ((3, 3), 0.5),
+    (("1x1", 1, 1), 55.5),
+
+    (("1x2", 2, 1), 10),   # 橫：寬2 高1
+    (("2x1", 1, 2), 20),   # 豎：寬1 高2
+
+    (("2x2", 2, 2), 5),
+
+    (("2x3", 3, 2), 4.5),  # 橫：寬3 高2
+    (("3x2", 2, 3), 4.5),  # 豎：寬2 高3
+
+    (("3x3", 3, 3), 0.5),
 ]
 
 ITEM_COUNT_WEIGHTS = [
@@ -678,12 +682,12 @@ QUALITY_WEIGHTS_BY_SIZE = {
         ("red", 4.9),
         ("diamond", 0.1),
     ],
-    "2x1": [
+    "1x2": [
         ("purple", 75),
         ("gold", 20),
         ("red", 5),
     ],
-    "1x2": [
+    "2x1": [
         ("blue", 60),
         ("purple", 25),
         ("gold", 12),
@@ -693,12 +697,12 @@ QUALITY_WEIGHTS_BY_SIZE = {
         ("gold", 70),
         ("red", 30),
     ],
-    "3x2": [
+    "2x3": [
         ("purple", 70),
         ("gold", 20),
         ("red", 10),
     ],
-    "2x3": [
+    "3x2": [
         ("purple", 80),
         ("red", 20),
     ],
@@ -730,12 +734,12 @@ ITEM_POOL = {
         "gold": ["座鐘"],
         "red": ["黃金瞪羚"],
     },
-    "3x2": {
+    "2x3": {
         "purple": ["儀典匕首"],
         "gold": ["本地特色首飾"],
         "red": ["步戰車模型"],
     },
-    "2x3": {
+    "3x2": {
         "purple": ["馬賽克檯燈"],
         "red": ["克勞迪烏斯半身像", "雷斯的留聲機"],
     },
@@ -793,7 +797,7 @@ def generate_loot_grid():
         items = []
         success = True
 
-        for idx, (w, h) in enumerate(sizes, start=1):
+        for idx, (size_key, w, h) in enumerate(sizes, start=1):
             pos = find_first_fit(grid, w, h)
 
             if pos is None:
@@ -802,7 +806,7 @@ def generate_loot_grid():
 
             x, y = pos
             item_id = str(idx)
-            size_key = f"{w}x{h}"
+
             quality = weighted_choice(QUALITY_WEIGHTS_BY_SIZE[size_key])
             name = random.choice(ITEM_POOL[size_key][quality])
 
@@ -813,6 +817,8 @@ def generate_loot_grid():
             items.append({
                 "id": item_id,
                 "size": size_key,
+                "w": w,
+                "h": h,
                 "quality": quality,
                 "name": name,
                 "x": x,
@@ -829,6 +835,8 @@ def generate_loot_grid():
     return grid, [{
         "id": "1",
         "size": "1x1",
+        "w": 1,
+        "h": 1,
         "quality": "blue",
         "name": "海盜銀幣",
         "x": 0,
