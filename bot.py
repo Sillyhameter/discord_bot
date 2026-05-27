@@ -836,9 +836,9 @@ class BigSafeHackTestView(discord.ui.View):
             f"目前進度：**{self.current_index + 1}/5**\n\n"
             "```text\n"
             f"{top}\n"
-            "---------------------\n"
+            "-----------------------------\n"
             f"{mid}\n"
-            "----------------------\n"
+            "-----------------------------\n"
             f"{bottom}\n"
             "```\n"
             "按下「停止」讓框框停在當前密碼。"
@@ -852,15 +852,12 @@ class BigSafeHackTestView(discord.ui.View):
                 color=0x00ff99
             )
 
-        title = "大保險破譯測試"
-
-        if self.failed:
-            title = "破譯錯誤"
+        title = "破譯錯誤" if self.failed else "大保險破譯測試"
 
         return discord.Embed(
             title=title,
             description=self.render_slot(),
-        color=0xff3333 if self.failed else 0xffcc00
+            color=0xff3333 if self.failed else 0xffcc00
         )
 
     async def start_loop(self):
@@ -948,7 +945,7 @@ class BigSafeHackTestView(discord.ui.View):
                 if self.task:
                     self.task.cancel()
 
-                await interaction.message.edit(
+                await self.message.edit(
                     embed=discord.Embed(
                         title="大保險已開啟",
                         description="正在打開容器...",
@@ -959,14 +956,14 @@ class BigSafeHackTestView(discord.ui.View):
 
                 return await self.reveal_loot_loop()
 
-            return await interaction.message.edit(
+            return await self.message.edit(
                 embed=self.build_embed(),
                 view=self
             )
 
         self.failed = True
 
-        await interaction.message.edit(
+        await self.message.edit(
             embed=self.build_embed(),
             view=self
         )
@@ -975,7 +972,7 @@ class BigSafeHackTestView(discord.ui.View):
 
         self.failed = False
 
-        await interaction.message.edit(
+        await self.message.edit(
             embed=self.build_embed(),
             view=self
         )
