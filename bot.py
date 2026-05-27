@@ -648,13 +648,13 @@ HACK_SYMBOLS = list(string.ascii_uppercase + string.digits)
 ITEM_SIZE_WEIGHTS = [
     (("1x1", 1, 1), 55.5),
 
-    (("1x2", 2, 1), 10),   # 橫：寬2 高1
-    (("2x1", 1, 2), 20),   # 豎：寬1 高2
+    (("1x2", 2, 1), 10),
+    (("2x1", 1, 2), 20),
 
     (("2x2", 2, 2), 5),
 
-    (("2x3", 3, 2), 4.5),  # 橫：寬3 高2
-    (("3x2", 2, 3), 4.5),  # 豎：寬2 高3
+    (("2x3", 3, 2), 4.5),
+    (("3x2", 2, 3), 4.5),
 
     (("3x3", 3, 3), 0.5),
 ]
@@ -677,9 +677,9 @@ QUALITY_SEARCH_TIMES = {
 QUALITY_WEIGHTS_BY_SIZE = {
     "1x1": [
         ("blue", 50),
-        ("purple", 32.9),
+        ("purple", 30),
         ("gold", 15),
-        ("red", 2),
+        ("red", 4.9),
         ("diamond", 0.1),
     ],
     "1x2": [
@@ -694,8 +694,8 @@ QUALITY_WEIGHTS_BY_SIZE = {
         ("red", 3),
     ],
     "2x2": [
-        ("gold", 85),
-        ("red", 15),
+        ("gold", 70),
+        ("red", 30),
     ],
     "2x3": [
         ("purple", 70),
@@ -807,8 +807,13 @@ def generate_loot_grid():
             x, y = pos
             item_id = str(idx)
 
-            quality = weighted_choice(QUALITY_WEIGHTS_BY_SIZE[size_key])
-            name = random.choice(ITEM_POOL[size_key][quality])
+            quality = weighted_choice(
+                QUALITY_WEIGHTS_BY_SIZE[size_key]
+            )
+
+            name = random.choice(
+                ITEM_POOL[size_key][quality]
+            )
 
             for yy in range(y, y + h):
                 for xx in range(x, x + w):
@@ -846,7 +851,10 @@ def generate_loot_grid():
 
 
 def render_loot_grid(grid, items):
-    item_map = {item["id"]: item for item in items}
+    item_map = {
+        item["id"]: item
+        for item in items
+    }
 
     quality_icons = {
         "blue": "🟦",
@@ -873,10 +881,14 @@ def render_loot_grid(grid, items):
 
             if state == "hidden":
                 row.append("⬛️")
+
             elif state == "searching":
                 row.append("🔍")
+
             elif state == "done":
-                row.append(quality_icons[item["quality"]])
+                row.append(
+                    quality_icons[item["quality"]]
+                )
 
         lines.append("".join(row))
 
@@ -887,8 +899,13 @@ def render_loot_grid(grid, items):
 
     loot_lines = []
 
-    for idx, item in enumerate(revealed_items, start=1):
-        loot_lines.append(f"{idx}. {item['name']}")
+    for idx, item in enumerate(
+        revealed_items,
+        start=1
+    ):
+        loot_lines.append(
+            f"{idx}. {item['name']}"
+        )
 
     result = "\n".join(lines)
 
@@ -912,20 +929,24 @@ class BigSafeHackTestView(discord.ui.View):
         ]
 
         self.code_countdowns = [
-            random.randint(1, 5) for _ in range(5)
+            random.randint(1, 5)
+            for _ in range(5)
         ]
 
         self.current_index = 0
         self.locked = [False] * 5
+
         self.failed = False
         self.opened = False
 
         self.tick = 0
+
         self.message = None
         self.task = None
 
         self.loot_grid = None
         self.loot_items = None
+
         self.searching_loot = False
 
         self.edit_lock = asyncio.Lock()
@@ -935,7 +956,11 @@ class BigSafeHackTestView(discord.ui.View):
             cells = []
 
             for i, ch in enumerate(row):
-                if middle and i == self.current_index and not self.opened:
+                if (
+                    middle
+                    and i == self.current_index
+                    and not self.opened
+                ):
                     cells.append(f"[{ch}]")
                 else:
                     cells.append(f" {ch} ")
@@ -968,28 +993,52 @@ class BigSafeHackTestView(discord.ui.View):
         if self.opened:
             return discord.Embed(
                 title="大保險已開啟｜正在搜索",
-                description=render_loot_grid(self.loot_grid, self.loot_items),
+                description=render_loot_grid(
+                    self.loot_grid,
+                    self.loot_items
+                ),
                 color=0x00ff99
             )
 
-        title = "破譯錯誤" if self.failed else "大保險破譯測試"
+        title = (
+            "破譯錯誤"
+            if self.failed
+            else "大保險破譯測試"
+        )
 
         return discord.Embed(
             title=title,
             description=self.render_slot(),
-            color=0xff3333 if self.failed else 0xffcc00
+            color=(
+                0xff3333
+                if self.failed
+                else 0xffcc00
+            )
         )
 
-    async def safe_edit(self, *, embed=None, view=None):
+    async def safe_edit(
+        self,
+        *,
+        embed=None,
+        view=None
+    ):
         if not self.message:
             return
 
         async with self.edit_lock:
             try:
-                await self.message.edit(embed=embed, view=view)
-            except (discord.NotFound, discord.Forbidden):
+                await self.message.edit(
+                    embed=embed,
+                    view=view
+                )
+
+            except (
+                discord.NotFound,
+                discord.Forbidden
+            ):
                 if self.task:
                     self.task.cancel()
+
             except discord.HTTPException:
                 await asyncio.sleep(2)
 
@@ -998,7 +1047,10 @@ class BigSafeHackTestView(discord.ui.View):
             while not self.opened:
                 await asyncio.sleep(1.0)
 
-                if self.failed or self.searching_loot:
+                if (
+                    self.failed
+                    or self.searching_loot
+                ):
                     continue
 
                 self.tick += 1
@@ -1007,27 +1059,51 @@ class BigSafeHackTestView(discord.ui.View):
 
                 for col in range(5):
                     if self.locked[col]:
-                        new_top.append(random.choice(HACK_SYMBOLS))
+                        new_top.append(
+                            random.choice(HACK_SYMBOLS)
+                        )
                         continue
 
                     self.code_countdowns[col] -= 1
 
-                    if self.code_countdowns[col] <= 0:
-                        new_top.append(self.code[col])
-                        self.code_countdowns[col] = random.randint(1, 5)
+                    if (
+                        self.code_countdowns[col]
+                        <= 0
+                    ):
+                        new_top.append(
+                            self.code[col]
+                        )
+
+                        self.code_countdowns[col] = (
+                            random.randint(1, 5)
+                        )
+
                     else:
-                        new_top.append(random.choice(HACK_SYMBOLS))
+                        new_top.append(
+                            random.choice(HACK_SYMBOLS)
+                        )
 
                 old_top = self.rows[0][:]
                 old_mid = self.rows[1][:]
 
                 for col in range(5):
                     if self.locked[col]:
-                        self.rows[1][col] = self.code[col]
+                        self.rows[1][col] = (
+                            self.code[col]
+                        )
+
                     else:
-                        self.rows[0][col] = new_top[col]
-                        self.rows[1][col] = old_top[col]
-                        self.rows[2][col] = old_mid[col]
+                        self.rows[0][col] = (
+                            new_top[col]
+                        )
+
+                        self.rows[1][col] = (
+                            old_top[col]
+                        )
+
+                        self.rows[2][col] = (
+                            old_mid[col]
+                        )
 
                 await self.safe_edit(
                     embed=self.build_embed(),
@@ -1039,37 +1115,66 @@ class BigSafeHackTestView(discord.ui.View):
 
     async def reveal_loot_loop(self):
         self.searching_loot = True
-        self.loot_grid, self.loot_items = generate_loot_grid()
 
-        await self.safe_edit(embed=self.build_embed(), view=None)
+        self.loot_grid, self.loot_items = (
+            generate_loot_grid()
+        )
+
+        await self.safe_edit(
+            embed=self.build_embed(),
+            view=None
+        )
 
         for item in self.loot_items:
             item["state"] = "searching"
-            await self.safe_edit(embed=self.build_embed(), view=None)
 
-            await asyncio.sleep(QUALITY_SEARCH_TIMES[item["quality"]])
+            await self.safe_edit(
+                embed=self.build_embed(),
+                view=None
+            )
+
+            await asyncio.sleep(
+                QUALITY_SEARCH_TIMES[
+                    item["quality"]
+                ]
+            )
 
             item["state"] = "done"
-            await self.safe_edit(embed=self.build_embed(), view=None)
+
+            await self.safe_edit(
+                embed=self.build_embed(),
+                view=None
+            )
 
         self.searching_loot = False
 
         await self.safe_edit(
             embed=discord.Embed(
                 title="大保險搜索完畢",
-                description=render_loot_grid(self.loot_grid, self.loot_items),
+                description=render_loot_grid(
+                    self.loot_grid,
+                    self.loot_items
+                ),
                 color=0x00ff99
             ),
-            view=None
+            view=BigSafeRestartView(
+                self.player
+            )
         )
 
-    @discord.ui.button(label="停止", style=discord.ButtonStyle.danger)
+    @discord.ui.button(
+        label="停止",
+        style=discord.ButtonStyle.danger
+    )
     async def stop_button(
         self,
         interaction: discord.Interaction,
         button: discord.ui.Button
     ):
-        if interaction.user.id != self.player.id:
+        if (
+            interaction.user.id
+            != self.player.id
+        ):
             return await interaction.response.send_message(
                 "這不是你的保險箱。",
                 ephemeral=True
@@ -1077,16 +1182,28 @@ class BigSafeHackTestView(discord.ui.View):
 
         await interaction.response.defer()
 
-        current = self.rows[1][self.current_index]
-        target = self.code[self.current_index]
+        current = self.rows[1][
+            self.current_index
+        ]
+
+        target = self.code[
+            self.current_index
+        ]
 
         if current == target:
-            self.locked[self.current_index] = True
-            self.rows[1][self.current_index] = target
+            self.locked[
+                self.current_index
+            ] = True
+
+            self.rows[1][
+                self.current_index
+            ] = target
+
             self.current_index += 1
 
             if self.current_index >= 5:
                 self.opened = True
+
                 self.clear_items()
 
                 if self.task:
@@ -1133,14 +1250,62 @@ class BigSafeHackTestView(discord.ui.View):
         await self.safe_edit(view=None)
 
 
-@tree.command(name="bigsafe_test", description="大保險破譯測試")
+class BigSafeRestartView(discord.ui.View):
+    def __init__(self, player):
+        super().__init__(timeout=60)
+        self.player = player
+
+    @discord.ui.button(
+        label="再玩一次",
+        style=discord.ButtonStyle.success
+    )
+    async def replay_button(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        if (
+            interaction.user.id
+            != self.player.id
+        ):
+            return await interaction.response.send_message(
+                "這不是你的測試。",
+                ephemeral=True
+            )
+
+        new_view = BigSafeHackTestView(
+            interaction.user
+        )
+
+        await interaction.response.edit_message(
+            embed=new_view.build_embed(),
+            view=new_view
+        )
+
+        new_view.message = (
+            await interaction.original_response()
+        )
+
+        new_view.task = asyncio.create_task(
+            new_view.start_loop()
+        )
+
+
+@tree.command(
+    name="bigsafe_test",
+    description="大保險破譯測試"
+)
 @app_commands.allowed_contexts(
     guilds=True,
     dms=True,
     private_channels=True
 )
-async def bigsafe_test(interaction: discord.Interaction):
-    view = BigSafeHackTestView(interaction.user)
+async def bigsafe_test(
+    interaction: discord.Interaction
+):
+    view = BigSafeHackTestView(
+        interaction.user
+    )
 
     await interaction.response.send_message(
         embed=view.build_embed(),
@@ -1148,8 +1313,12 @@ async def bigsafe_test(interaction: discord.Interaction):
     )
 
     msg = await interaction.original_response()
+
     view.message = msg
-    view.task = asyncio.create_task(view.start_loop())
+
+    view.task = asyncio.create_task(
+        view.start_loop()
+    )
 
 DELTA_LOCATIONS = {
     "遊客中心": ["阿薩拉營地", "行政樓"],
