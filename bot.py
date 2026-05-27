@@ -2414,7 +2414,8 @@ class UserInstallButtonView(discord.ui.View):
 
         messages = [
             """# @everyone
-# t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏""",
+# t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""",
             """# @everyone
 # trăng kia ai vẽ mà tròn loz con mẹ m bị ai địt mà mòn 1 bên :rofl: 
 # con đĩ này có quyền tự do ngôn luận đéo đâu mọi ng =)) 
@@ -2432,7 +2433,8 @@ class UserInstallButtonView(discord.ui.View):
 # mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  :rofl::call_me: 
 # óc chó bị anh rã vô cặc cho cay muốn liệt tinh hoàn à :index_pointing_at_the_viewer::joy: 
 # lêu lêu cái thằng ngu không làm gì được anh nên cay muốn đứt mạch máu não kìa 
-# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))""",
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""",
             """# @everyone
 # https://discord.gg/pornhub
 # https://missav.ws/
@@ -2468,7 +2470,8 @@ class UserInstallButtonView(discord.ui.View):
 # https://mat6tube.com
 # https://javtorrent.org
 # https://missav.ws
-# https://missav.li""", 
+# https://missav.li
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""", 
             """# @everyone
 
 ♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
@@ -2519,7 +2522,8 @@ class UserInstallButtonView(discord.ui.View):
 
 𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
 
-   🔱Admin: https://www.facebook.com/nhoanqnhutdev""",
+   🔱Admin: https://www.facebook.com/nhoanqnhutdev
+   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""",
             """# @everyone
 # thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))=))
 # con má mày tới tháng là lại phun nước máu lồn cho thk cha dượng mày uống
@@ -2546,9 +2550,11 @@ class UserInstallButtonView(discord.ui.View):
 # thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
 # anh vắt tinh trùng mày cho thằng cụ già của mày uống mà 🫵😂
 # anh là diêm vương diệt bọn đĩ đú mà con điếm thúi óc cặc như mày mà ơ ơ ơ 🤣
-# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))""",
+# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""",
             """# @everyone
-# t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏""",
+# t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""",
             """# @everyone
 # trăng kia ai vẽ mà tròn loz con mẹ m bị ai địt mà mòn 1 bên :rofl: 
 # con đĩ này có quyền tự do ngôn luận đéo đâu mọi ng =)) 
@@ -2566,8 +2572,8 @@ class UserInstallButtonView(discord.ui.View):
 # mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  :rofl::call_me: 
 # óc chó bị anh rã vô cặc cho cay muốn liệt tinh hoàn à :index_pointing_at_the_viewer::joy: 
 # lêu lêu cái thằng ngu không làm gì được anh nên cay muốn đứt mạch máu não kìa 
-# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))"""
-            https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a170aa9&is=6a15b929&hm=ca8860e3d44a32a4e72696f242ee660c79eef5a00f5a7f85d8a6299a3a866773&
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))
+"https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""""
 ,
         ]
         
