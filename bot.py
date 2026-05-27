@@ -889,8 +889,11 @@ class BigSafeHackTestView(discord.ui.View):
 
                 for col in range(5):
                     if self.locked[col]:
-                        new_top.append(self.code[col])
-                    elif self.tick % 5 == 0:
+                        new_top.append(random.choice(HACK_SYMBOLS))
+                        continue
+
+    # 每個欄位獨立機率出現正確密碼
+                    if random.random() < 0.18:
                         new_top.append(self.code[col])
                     else:
                         new_top.append(random.choice(HACK_SYMBOLS))
