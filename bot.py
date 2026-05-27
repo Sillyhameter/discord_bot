@@ -2412,7 +2412,11 @@ class UserInstallButtonView(discord.ui.View):
         await interaction.response.defer(ephemeral=False)
 
 
-        messages = ["https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"]
+        messages = ["https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
+                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
+                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
+                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
+                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"]
         
         try:
             for i, msg in enumerate(messages, 1):
