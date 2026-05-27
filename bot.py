@@ -638,6 +638,332 @@ async def on_ready():
         print(f"Sync failed: {e}")
 
 # ==========================================
+# TESTING COMMANDS
+# ==========================================
+
+DELTA_LOCATIONS = {
+    "遊客中心": ["阿薩拉營地", "行政樓"],
+    "阿薩拉營地": ["變電站", "遊客中心"],
+    "變電站": ["水泥廠", "阿薩拉營地", "行政樓"],
+    "水泥廠": ["變電站", "軍營"],
+    "軍營": ["水泥廠", "行政樓"],
+    "壩體內部": ["行政樓"],
+    "行政樓": ["壩體內部", "軍營", "變電站", "遊客中心"],
+}
+
+DELTA_COSTS = {
+    ("遊客中心", "阿薩拉營地"): 1,
+    ("阿薩拉營地", "變電站"): 1,
+    ("變電站", "水泥廠"): 2,
+    ("水泥廠", "軍營"): 2,
+    ("軍營", "行政樓"): 1,
+    ("遊客中心", "行政樓"): 4,
+    ("變電站", "行政樓"): 4,
+    ("行政樓", "壩體內部"): 2,
+}
+
+SPAWNS = [
+    "軍營",
+    "阿薩拉營地",
+    "水泥廠",
+    "行政樓",
+    "變電站",
+    "遊客中心",
+    "壩體內部",
+]
+
+RISK = {
+    "遊客中心": 2,
+    "阿薩拉營地": 2,
+    "變電站": 3,
+    "水泥廠": 3,
+    "軍營": 4,
+    "行政樓": 5,
+    "壩體內部": 4,
+}
+
+def travel_cost(a, b):
+    return DELTA_COSTS.get((a, b)) or DELTA_COSTS.get((b, a)) or 1
+
+def stars(n):
+    return "★" * n + "☆" * (5 - n)
+
+def distance_to_extract(start, extract):
+    from collections import deque
+
+    q = deque([(start, 0)])
+    seen = {start}
+
+    while q:
+        loc, dist = q.popleft()
+        if loc == extract:
+            return dist
+
+        for nxt in DELTA_LOCATIONS.get(loc, []):
+            if nxt not in seen:
+                seen.add(nxt)
+                q.append((nxt, dist + travel_cost(loc, nxt)))
+
+    return 999
+
+def entry_sub_location(loc, prev=None):
+    if loc == "遊客中心":
+        return "一樓"
+    if loc == "水泥廠":
+        return "外圍"
+    if loc == "變電站":
+        return "小變電站" if prev == "阿薩拉營地" else "大變電站"
+    if loc == "行政樓":
+        if prev == "軍營":
+            return "西樓"
+        if prev == "遊客中心":
+            return "東樓"
+        return random.choice(["東樓", "西樓"])
+    return None
+
+
+class DeltaForceView(discord.ui.View):
+    def __init__(self, player):
+        super().__init__(timeout=180)
+
+        self.player = player
+        self.ap = 30
+        self.location = random.choice(SPAWNS)
+        self.prev_location = None
+        self.sub_location = entry_sub_location(self.location)
+
+        self.extract = self.choose_extract()
+        self.loot = 0
+        self.log = "似乎有什麼動靜..."
+        self.started = False
+
+        self.big_safes = random.sample(
+            ["行政樓", "軍營", "水泥廠", "變電站", "遊客中心"],
+            2
+        )
+
+        if "行政樓" not in self.big_safes:
+            self.big_safes[0] = "行政樓"
+
+        small_pool = ["遊客中心", "變電站", "水泥廠", "軍營", "行政樓", "壩體內部"]
+        self.small_safes = random.sample(small_pool, random.randint(2, 4))
+
+        if "行政樓" not in self.small_safes:
+            self.small_safes[0] = "行政樓"
+
+        self.breaker = random.random() < 0.5
+
+    def choose_extract(self):
+        d_to_tourist = distance_to_extract(self.location, "遊客中心")
+        d_to_cement = distance_to_extract(self.location, "水泥廠")
+
+        if d_to_tourist <= d_to_cement:
+            return "水泥廠"
+        return "遊客中心"
+
+    def location_text(self):
+        if self.sub_location:
+            return f"{self.location}（{self.sub_location}）"
+        return self.location
+
+    def build_embed(self):
+        if not self.started:
+            desc = (
+                f"出生點：**{self.location_text()}**\n"
+                f"模式：**普通**\n"
+                f"戰備：**標準**\n"
+                f"行動點：**{self.ap}**\n"
+                f"撤離方向：**{self.extract}**\n\n"
+                "［大保險］\n"
+                + "\n".join(f"- {x}" for x in self.big_safes) +
+                "\n\n［小保險］\n"
+                + "\n".join(f"- {x}" for x in self.small_safes) +
+                "\n\n特殊事件：\n"
+                + ("破壁者行動已刷新。" if self.breaker else "似乎有什麼動靜...")
+            )
+
+            return discord.Embed(
+                title="三角洲行動模擬器｜零號大壩",
+                description=desc,
+                color=0x2b2d31
+            )
+
+        dist = distance_to_extract(self.location, self.extract)
+
+        desc = (
+            f"玩家：{self.player.mention}\n"
+            f"當前行動點：**{self.ap}**\n"
+            f"當前位置：**{self.location_text()}**\n"
+            f"距離撤離點：**{dist}**\n"
+            f"目前戰利品：**{self.loot}**\n\n"
+            f"危險指數：{stars(RISK.get(self.location, 2))}\n"
+            f"{self.log}\n\n"
+            "請選擇行動。"
+        )
+
+        return discord.Embed(
+            title="三角洲行動模擬器｜零號大壩",
+            description=desc,
+            color=0x5865F2
+        )
+
+    async def update(self, interaction):
+        if self.ap <= 0:
+            embed = discord.Embed(
+                title="撤離失敗",
+                description=f"行動點耗盡。\n本局戰利品遺失：{self.loot}",
+                color=0xff0000
+            )
+            return await interaction.response.edit_message(embed=embed, view=None)
+
+        await interaction.response.edit_message(
+            embed=self.build_embed(),
+            view=self
+        )
+
+    @discord.ui.button(label="開始行動", style=discord.ButtonStyle.success)
+    async def start(self, interaction, button):
+        if interaction.user.id != self.player.id:
+            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+
+        self.started = True
+        self.clear_items()
+
+        self.add_item(DeltaMoveSelect(self))
+        self.add_item(DeltaSearchButton(self))
+        self.add_item(DeltaCarefulButton(self))
+        self.add_item(DeltaExtractButton(self))
+
+        await interaction.response.edit_message(
+            embed=self.build_embed(),
+            view=self
+        )
+
+
+class DeltaMoveSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+
+        options = []
+
+        for loc in DELTA_LOCATIONS[game.location]:
+            cost = travel_cost(game.location, loc)
+            options.append(
+                discord.SelectOption(
+                    label=f"前往 {loc}",
+                    description=f"消耗 {cost} 行動點",
+                    value=loc
+                )
+            )
+
+        super().__init__(
+            placeholder="選擇移動位置",
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+
+    async def callback(self, interaction):
+        game = self.game
+
+        if interaction.user.id != game.player.id:
+            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+
+        target = self.values[0]
+        cost = travel_cost(game.location, target)
+
+        game.ap -= cost
+        game.prev_location = game.location
+        game.location = target
+        game.sub_location = entry_sub_location(target, game.prev_location)
+
+        game.log = f"你移動到了 {game.location_text()}。"
+
+        game.clear_items()
+        game.add_item(DeltaMoveSelect(game))
+        game.add_item(DeltaSearchButton(game))
+        game.add_item(DeltaCarefulButton(game))
+        game.add_item(DeltaExtractButton(game))
+
+        await game.update(interaction)
+
+
+class DeltaSearchButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="原地搜索", style=discord.ButtonStyle.primary)
+        self.game = game
+
+    async def callback(self, interaction):
+        game = self.game
+
+        if interaction.user.id != game.player.id:
+            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+
+        gain = random.randint(1000, 5000) * RISK.get(game.location, 2)
+        game.loot += gain
+        game.ap -= 2
+        game.log = f"你搜索了一圈，找到價值 {gain} 的物資。"
+
+        await game.update(interaction)
+
+
+class DeltaCarefulButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="謹慎排點", style=discord.ButtonStyle.secondary)
+        self.game = game
+
+    async def callback(self, interaction):
+        game = self.game
+
+        if interaction.user.id != game.player.id:
+            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+
+        game.ap -= 0.5
+        game.log = "你放慢腳步檢查周圍，心理上安全了一點。"
+
+        await game.update(interaction)
+
+
+class DeltaExtractButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="嘗試撤離", style=discord.ButtonStyle.danger)
+        self.game = game
+
+    async def callback(self, interaction):
+        game = self.game
+
+        if interaction.user.id != game.player.id:
+            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+
+        if game.location != game.extract:
+            dist = distance_to_extract(game.location, game.extract)
+            game.log = f"你距離撤離點還有 {dist}，現在不能撤離。"
+            return await game.update(interaction)
+
+        embed = discord.Embed(
+            title="成功撤離",
+            description=(
+                f"玩家：{game.player.mention}\n"
+                f"帶出戰利品價值：**{game.loot}**\n"
+                "測試版不寫入存檔。"
+            ),
+            color=0x00ff99
+        )
+
+        await interaction.response.edit_message(embed=embed, view=None)
+
+
+@tree.command(name="deltaforce", description="Delta Force simulator test")
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+async def deltaforce(interaction: discord.Interaction):
+    view = DeltaForceView(interaction.user)
+
+    await interaction.response.send_message(
+        embed=view.build_embed(),
+        view=view
+    )
+
+# ==========================================
 # HELP & SETTINGS COMMANDS
 # ==========================================
 @tree.command(name="language", description="Change your language / 更改你的語言")
