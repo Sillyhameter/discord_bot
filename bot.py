@@ -790,6 +790,9 @@ class BigSafeHackTestView(discord.ui.View):
 
         self.player = player
         self.code = generate_code()
+        self.code_countdowns = [
+            random.randint(1, 5) for _ in range(5)
+        ]
 
         self.rows = [
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
@@ -892,11 +895,17 @@ class BigSafeHackTestView(discord.ui.View):
                         new_top.append(random.choice(HACK_SYMBOLS))
                         continue
 
-    # 每個欄位獨立機率出現正確密碼
-                    if random.random() < 0.18:
-                        new_top.append(self.code[col])
-                    else:
-                        new_top.append(random.choice(HACK_SYMBOLS))
+                    self.code_countdowns[col] -= 1
+
+                        if self.code_countdowns[col] <= 0:
+
+                            new_top.append(self.code[col])
+
+                            self.code_countdowns[col] = random.randint(1, 5)
+
+                        else:
+
+                            new_top.append(random.choice(HACK_SYMBOLS))
 
                 old_top = self.rows[0][:]
                 old_mid = self.rows[1][:]
