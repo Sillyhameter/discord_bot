@@ -897,15 +897,15 @@ class BigSafeHackTestView(discord.ui.View):
 
                     self.code_countdowns[col] -= 1
 
-                        if self.code_countdowns[col] <= 0:
+                    if self.code_countdowns[col] <= 0:
 
-                            new_top.append(self.code[col])
+                        new_top.append(self.code[col])
 
-                            self.code_countdowns[col] = random.randint(1, 5)
+                        self.code_countdowns[col] = random.randint(1, 5)
 
-                        else:
+                    else:
 
-                            new_top.append(random.choice(HACK_SYMBOLS))
+                        new_top.append(random.choice(HACK_SYMBOLS))
 
                 old_top = self.rows[0][:]
                 old_mid = self.rows[1][:]
