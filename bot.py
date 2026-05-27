@@ -7,6 +7,7 @@ import os
 import json
 import time
 import requests
+import string
 from colorama import Fore, init  # ← This was missing!
 from discord.ext import commands
 backup_started = False
