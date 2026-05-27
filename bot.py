@@ -642,13 +642,6 @@ async def on_ready():
 # 無存檔測試版
 # =========================
 
-import asyncio
-import random
-import string
-import discord
-from discord import app_commands
-
-
 HACK_SYMBOLS = list(string.ascii_uppercase + string.digits)
 
 ITEM_SIZE_WEIGHTS = [
@@ -817,23 +810,20 @@ class BigSafeHackTestView(discord.ui.View):
         self.searching_loot = False
 
     def render_slot(self):
-        top = "  ".join(self.rows[0])
+        def fmt_row(row, middle=False):
+            cells = []
 
-        mid_cells = []
-
-        for i, ch in enumerate(self.rows[1]):
-            if self.locked[i]:
-                mid_cells.append(f" {ch} ")
-            elif i == self.current_index:
-                if self.failed:
-                    mid_cells.append(f"[{ch}]")
+            for i, ch in enumerate(row):
+                if middle and i == self.current_index and not self.opened:
+                    cells.append(f"[{ch}]")
                 else:
-                    mid_cells.append(f"[{ch}]")
-            else:
-                mid_cells.append(f" {ch} ")
+                    cells.append(f" {ch} ")
 
-        mid = " ".join(mid_cells)
-        bottom = "  ".join(self.rows[2])
+            return " ".join(cells)
+
+        top = fmt_row(self.rows[0])
+        mid = fmt_row(self.rows[1], middle=True)
+        bottom = fmt_row(self.rows[2])
 
         code_line = " ".join(
             f"✅{c}" if self.locked[i] else c
@@ -845,9 +835,9 @@ class BigSafeHackTestView(discord.ui.View):
             f"目前進度：**{self.current_index + 1}/5**\n\n"
             "```text\n"
             f"{top}\n"
-            "---------------------\n"
+            "-----------------------------\n"
             f"{mid}\n"
-            "---------------------\n"
+            "-----------------------------\n"
             f"{bottom}\n"
             "```\n"
             "按下「停止」讓框框停在當前密碼。"
@@ -869,22 +859,37 @@ class BigSafeHackTestView(discord.ui.View):
 
     async def start_loop(self):
         while not self.opened:
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.75)
 
             if self.failed:
                 continue
 
             self.tick += 1
 
-            for row in range(3):
-                for col in range(5):
-                    if self.locked[col]:
-                        self.rows[row][col] = self.code[col]
-                    else:
-                        if self.tick % 5 == 0:
-                            self.rows[row][col] = self.code[col]
-                        else:
-                            self.rows[row][col] = random.choice(HACK_SYMBOLS)
+            new_top = []
+
+            for col in range(5):
+                if self.locked[col]:
+                    new_top.append(self.code[col])
+                    continue
+
+                if self.tick % 5 == 0:
+                    new_top.append(self.code[col])
+                else:
+                    new_top.append(random.choice(HACK_SYMBOLS))
+
+            old_top = self.rows[0][:]
+            old_mid = self.rows[1][:]
+
+            for col in range(5):
+                if self.locked[col]:
+                    self.rows[0][col] = self.code[col]
+                    self.rows[1][col] = self.code[col]
+                    self.rows[2][col] = self.code[col]
+                else:
+                    self.rows[0][col] = new_top[col]
+                    self.rows[1][col] = old_top[col]
+                    self.rows[2][col] = old_mid[col]
 
             if self.message:
                 await self.message.edit(embed=self.build_embed(), view=self)
@@ -925,7 +930,9 @@ class BigSafeHackTestView(discord.ui.View):
 
         if current == target:
             self.locked[self.current_index] = True
+            self.rows[0][self.current_index] = target
             self.rows[1][self.current_index] = target
+            self.rows[2][self.current_index] = target
             self.current_index += 1
 
             if self.current_index >= 5:
@@ -952,12 +959,24 @@ class BigSafeHackTestView(discord.ui.View):
             )
 
         self.failed = True
-        await interaction.message.edit(embed=self.build_embed(), view=self)
+
+        await interaction.message.edit(
+            embed=discord.Embed(
+                title="破譯錯誤",
+                description=self.render_slot(),
+                color=0xff3333
+            ),
+            view=self
+        )
 
         await asyncio.sleep(2)
 
         self.failed = False
-        await interaction.message.edit(embed=self.build_embed(), view=self)
+
+        await interaction.message.edit(
+            embed=self.build_embed(),
+            view=self
+        )
 
     async def on_timeout(self):
         if self.task:
@@ -970,7 +989,11 @@ class BigSafeHackTestView(discord.ui.View):
 
 
 @tree.command(name="bigsafe_test", description="大保險破譯測試")
-@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+@app_commands.allowed_contexts(
+    guilds=True,
+    dms=True,
+    private_channels=True
+)
 async def bigsafe_test(interaction: discord.Interaction):
     view = BigSafeHackTestView(interaction.user)
 
