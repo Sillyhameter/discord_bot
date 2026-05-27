@@ -807,16 +807,30 @@ class DeltaForceView(discord.ui.View):
     def roll_small_safes(self):
         count = random.randint(2, 4)
         result = []
+        used_places = set(self.big_safes)
 
-        # 行政樓必刷一個小保
-        result.append(("行政樓", random.choice(["東樓", "西樓"])))
+        # 行政樓必刷一個小保，但不能跟大保同位置
+        admin_options = [
+            ("行政樓", "東樓"),
+            ("行政樓", "西樓"),
+        ]
+        admin_options = [x for x in admin_options if x not in used_places]
 
-        pool = [x for x in SMALL_SAFE_POOL if x[0] != "阿薩拉營地"]
-        pool = [x for x in pool if x not in result]
+        if admin_options:
+            pick = random.choice(admin_options)
+            result.append(pick)
+            used_places.add(pick)
 
-        while len(result) < count:
+        pool = [
+            x for x in SMALL_SAFE_POOL
+            if x[0] != "阿薩拉營地"
+            and x not in used_places
+        ]
+
+        while len(result) < count and pool:
             pick = random.choice(pool)
             result.append(pick)
+            used_places.add(pick)
             pool.remove(pick)
 
         return result
@@ -834,10 +848,6 @@ class DeltaForceView(discord.ui.View):
     def refresh_view_items(self):
         self.clear_items()
         self.add_item(DeltaMoveSelect(self))
-
-        if self.location in DELTA_SUB_AREAS:
-            self.add_item(DeltaSubMoveSelect(self))
-
         self.add_item(DeltaSearchButton(self))
         self.add_item(DeltaCarefulButton(self))
         self.add_item(DeltaExtractButton(self))
@@ -914,18 +924,30 @@ class DeltaForceView(discord.ui.View):
 class DeltaMoveSelect(discord.ui.Select):
     def __init__(self, game):
         self.game = game
-
         options = []
 
+        # 外部區域移動
         for loc in DELTA_LOCATIONS[game.location]:
             cost = travel_cost(game.location, loc)
             options.append(
                 discord.SelectOption(
                     label=f"前往 {loc}",
-                    description=f"消耗 {cost} 行動點",
-                    value=loc
+                    description=f"區域移動｜消耗 {cost} 行動點",
+                    value=f"move:{loc}"
                 )
             )
+
+        # 內部區域移動
+        areas = DELTA_SUB_AREAS.get(game.location, [])
+        for area in areas:
+            if area != game.sub_location:
+                options.append(
+                    discord.SelectOption(
+                        label=f"前往 {game.location}（{area}）",
+                        description="區域內移動｜消耗 1 行動點",
+                        value=f"sub:{area}"
+                    )
+                )
 
         super().__init__(
             placeholder="選擇移動位置",
@@ -940,76 +962,33 @@ class DeltaMoveSelect(discord.ui.Select):
         if interaction.user.id != game.player.id:
             return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
 
-        target = self.values[0]
-        cost = travel_cost(game.location, target)
+        value = self.values[0]
 
-        if game.ap < cost:
-            game.log = "行動點不足，無法移動。"
-            return await game.update(interaction)
+        if value.startswith("move:"):
+            target = value.replace("move:", "")
+            cost = travel_cost(game.location, target)
 
-        game.ap -= cost
-        game.prev_location = game.location
-        game.location = target
-        game.sub_location = entry_sub_location(target, game.prev_location)
+            if game.ap < cost:
+                game.log = "行動點不足，無法移動。"
+                return await game.update(interaction)
 
-        game.log = f"你移動到了 {game.location_text()}。"
-        game.refresh_danger()
-        game.refresh_view_items()
+            game.ap -= cost
+            game.prev_location = game.location
+            game.location = target
+            game.sub_location = entry_sub_location(target, game.prev_location)
+            game.log = f"你移動到了 {game.location_text()}。"
 
-        await game.update(interaction)
+        elif value.startswith("sub:"):
+            target_sub = value.replace("sub:", "")
+            cost = 1
 
+            if game.ap < cost:
+                game.log = "行動點不足，無法移動。"
+                return await game.update(interaction)
 
-class DeltaSubMoveSelect(discord.ui.Select):
-    def __init__(self, game):
-        self.game = game
-
-        options = []
-
-        areas = DELTA_SUB_AREAS.get(game.location, [])
-
-        for area in areas:
-            if area != game.sub_location:
-                options.append(
-                    discord.SelectOption(
-                        label=f"前往 {area}",
-                        description="消耗 1 行動點",
-                        value=area
-                    )
-                )
-
-        if not options:
-            options.append(
-                discord.SelectOption(
-                    label="此區域沒有內部移動",
-                    value="none"
-                )
-            )
-
-        super().__init__(
-            placeholder="區域內移動",
-            min_values=1,
-            max_values=1,
-            options=options
-        )
-
-    async def callback(self, interaction):
-        game = self.game
-
-        if interaction.user.id != game.player.id:
-            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
-
-        target = self.values[0]
-
-        if target == "none":
-            return await interaction.response.send_message("這裡沒有可切換的內部區域。", ephemeral=True)
-
-        if game.ap < 1:
-            game.log = "行動點不足，無法移動。"
-            return await game.update(interaction)
-
-        game.ap -= 1
-        game.sub_location = target
-        game.log = f"你移動到了 {game.location}（{game.sub_location}）。"
+            game.ap -= cost
+            game.sub_location = target_sub
+            game.log = f"你移動到了 {game.location_text()}。"
 
         game.refresh_danger()
         game.refresh_view_items()
