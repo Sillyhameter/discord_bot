@@ -900,9 +900,9 @@ class BigSafeHackTestView(discord.ui.View):
 
                 for col in range(5):
                     if self.locked[col]:
-                        self.rows[0][col] = self.code[col]
+                        
                         self.rows[1][col] = self.code[col]
-                        self.rows[2][col] = self.code[col]
+                        
                     else:
                         self.rows[0][col] = new_top[col]
                         self.rows[1][col] = old_top[col]
@@ -929,6 +929,14 @@ class BigSafeHackTestView(discord.ui.View):
             await self.safe_edit(embed=self.build_embed(), view=None)
 
         self.searching_loot = False
+        await self.safe_edit(
+            embed=discord.Embed(
+                title="大保險搜索完畢",
+                description=render_loot_grid(self.loot_grid, self.loot_items),
+                color=0x00ff99
+            ),
+            view=None
+        )
 
     @discord.ui.button(label="停止", style=discord.ButtonStyle.danger)
     async def stop_button(
@@ -949,9 +957,9 @@ class BigSafeHackTestView(discord.ui.View):
 
         if current == target:
             self.locked[self.current_index] = True
-            self.rows[0][self.current_index] = target
+            
             self.rows[1][self.current_index] = target
-            self.rows[2][self.current_index] = target
+            
             self.current_index += 1
 
             if self.current_index >= 5:
