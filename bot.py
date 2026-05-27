@@ -836,9 +836,9 @@ class BigSafeHackTestView(discord.ui.View):
             f"目前進度：**{self.current_index + 1}/5**\n\n"
             "```text\n"
             f"{top}\n"
-            "-----------------------------\n"
+            "---------------------\n"
             f"{mid}\n"
-            "-----------------------------\n"
+            "----------------------\n"
             f"{bottom}\n"
             "```\n"
             "按下「停止」讓框框停在當前密碼。"
@@ -852,10 +852,15 @@ class BigSafeHackTestView(discord.ui.View):
                 color=0x00ff99
             )
 
+        title = "大保險破譯測試"
+
+        if self.failed:
+            title = "破譯錯誤"
+
         return discord.Embed(
-            title="大保險破譯測試",
+            title=title,
             description=self.render_slot(),
-            color=0xff3333 if self.failed else 0xffcc00
+        color=0xff3333 if self.failed else 0xffcc00
         )
 
     async def start_loop(self):
@@ -962,11 +967,7 @@ class BigSafeHackTestView(discord.ui.View):
         self.failed = True
 
         await interaction.message.edit(
-            embed=discord.Embed(
-                title="破譯錯誤",
-                description=self.render_slot(),
-                color=0xff3333
-            ),
+            embed=self.build_embed(),
             view=self
         )
 
