@@ -2412,11 +2412,146 @@ class UserInstallButtonView(discord.ui.View):
         await interaction.response.defer(ephemeral=False)
 
 
-        messages = ["https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
-                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
-                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
-                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&",
-                   "https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"]
+        messages = [
+            """# @everyone
+            # t.me/varvarafurry 틓탑컏쳍쫋죉웇쓅싃상뺿벽못뢹뚷뒵늳낱꺯겭ꪫꢩꚧ꒥ꊣꂡ麟鲝骛颙隗钕銓邑躏貍誋袉蚇蒅芃肁繿籽穻硹癷瑵牳灱湯汭橫桩晧摥扣恡幟屝婛塙噗呕剓偑乏䱍䩋䡉䙇䑅䉃䁁㸿㰽㨻㠹㘷㐵㈳〱ⸯⰭ⨫⠩☧␥∣‡ḟᰝᨛ᠙ᘗᐕሓထฏ఍਋ࠉ؇Ѕȃ℀ӹਅ＀Ⰰõࠀÿ呓堚ᕩఎ嚫ࡹʠÀ·娢㘣娌ڶ됤ꂬⶀ衛ධ킡ˠஅ儦뭢ඐ䮙栲⦛ꙓ⎶朳愞ආ荛뜝䖒傚 ꌣ轈䴪瓊ꌩ䖥຋ௐᆱ됕ᮡ멙屴놟昣䯍도걞ㅕ烻䏪쐀䖈䀄耗愊賂䬥촖҃ᑬ걈䄠나䄖ጙ⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓⛓⛓️⛓️⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓️⛓⛓⛓⛓️⛓㍀꛿‾ע鎰羏
+            https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
+            """# @everyone
+# trăng kia ai vẽ mà tròn loz con mẹ m bị ai địt mà mòn 1 bên :rofl: 
+# con đĩ này có quyền tự do ngôn luận đéo đâu mọi ng =)) 
+# thằng cặc chứng kiến cái cảnh mẹ nó bị t cầm bật lửa đốt từng cộng lông bướm:))) 
+# thằng con chó quỳ xuống liếm từng bãi nước đái , ăn từng cục cứt tao đi e 
+# Mẹ Mày Bị Cha Đụ Từ Nam Vào Đến Bắc Mà :zany_face: :punch:
+# vào 10 năm trước t bắt cóc con đĩ mẹ mày t làm nô lệ tình dục để kiếm tiền cho t đi bar 
+# quẩy bay lắc cái lỗ lồn con đĩ mẹ mày mà =))) 
+# t sát sinh cả gia phả nhà m mà em êy 
+# người yêu nó bị t chém đứt đầu xong t còn bắt làm nô lệ tình dục cho con chó nhà t =)) 
+# Đến lúc con mẹ mày được nhét vô trong quan tài thì tao lại đào lên và vắt dái ra đái vô mồm lồn con đĩ mẹ mày =)) 
+# m có cảnh kh thk óc cặc 
+# thằng này ăn và khen chubin anh singu khen ngon quá=)) 
+# anh lấy cái ô tô anh đâm thẳng dô cái lồn con gái mẹ thằng súc vật như m 
+# mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  :rofl::call_me: 
+# óc chó bị anh rã vô cặc cho cay muốn liệt tinh hoàn à :index_pointing_at_the_viewer::joy: 
+# lêu lêu cái thằng ngu không làm gì được anh nên cay muốn đứt mạch máu não kìa 
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))
+https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
+            """# @everyone
+# https://discord.gg/pornhub
+# https://missav.ws/
+# https://taiav.com/
+# https://missav.com
+# https://jav.guru
+# https://javmost.com
+# https://supjav.com
+# https://javtiful.com
+# https://javtits.com
+# https://javhdporn.net
+# https://avjb.com
+# https://7mmtv.sx
+# https://jav321.com
+# https://javfinder.com
+# https://javgg.net
+# https://jav.gsex.fun
+# https://javhd.today
+# https://avbebe.com
+# https://javmix.tv
+# https://javhd3x.com
+# https://javbobo.com
+# https://javday.tv
+# https://javquick.com
+# https://jav777.cc
+# https://javmost.cx
+# https://javseen.tv
+# https://18av.pro
+# https://avbebe2.com
+# https://njavtv.com
+# https://porn5f.com
+# https://av01.tv
+# https://mat6tube.com
+# https://javtorrent.org
+# https://missav.ws
+# https://missav.li
+https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
+            """# @everyone
+
+♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
+  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
+----------------------------------------------
+★　*　　　　　°　　　　🛰️　°·　　                            🪐
+
+.　　　•　°★　•  ☄
+
+▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
+
+
+𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
+
+♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
+  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
+----------------------------------------------
+★　*　　　　　°　　　　🛰️　°·　　                            🪐
+
+.　　　•　°★　•  ☄
+
+▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
+
+
+𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
+
+♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
+  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
+----------------------------------------------
+★　*　　　　　°　　　　🛰️　°·　　                            🪐
+
+.　　　•　°★　•  ☄
+
+▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
+
+
+𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
+
+♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
+  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
+----------------------------------------------
+★　*　　　　　°　　　　🛰️　°·　　                            🪐
+
+.　　　•　°★　•  ☄
+
+▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
+
+
+𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
+
+   🔱Admin: https://www.facebook.com/nhoanqnhutdev
+   https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
+            """# @everyone
+# thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))=))
+# con má mày tới tháng là lại phun nước máu lồn cho thk cha dượng mày uống
+# Nghèo bần hèn bị cha mày đứng trên đạp đầu lũ đú chúng mày cha đi lên
+# Cha mày hóa thân thành hắc bạch vô thường cha mày bắt hồn đĩ mẹ mày xuống chầu diêm vương
+# Sống như 1 con chó ngu dốt như lũ phèn ói chợ búa cầm dao múa kiếm
+# thằng ảo war bị tao chửi cố gắng phản kháng nhưng nút home k cho phép mày cay quá đập cmn máy 🤣👈
+# ê cái con súc sinh chó đẻ này đang cố vùng vẫy trước khi anh hành quyết chém đầu con đĩ mẹ mày à mọi ngừi 😁👆
+# thằng óc chó trăn chối điều cuối cùng gì trước khi anh cầm đao phủ anh rã vô não chó mày cho mày tử vong không á 😁🤟
+# cái lồn mẹ mày tật nguyền đến mức đẻ ra sản phẩm lỗi của con người vậy cơ à 🗿🤟
+# mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  🤣🤙
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))
+# cả họ nhà mày phải xếp hàng lần lượt bú dái t mà🤣🤣
+# thằng đầu đinh ở nhà mái tôn lấy lá chuối đắp lồn mơ ước được ở nhà cao cửa rộng =))
+# thằng này ăn và khen chubin anh singu khen ngon quá=))
+# bố của mày là 1 con chó ngao tây tạng đó thằng óc chó 🫵😂
+# anh đụ mẹ mày bằng bao cao su mà 🥺
+# thằng óc cặc như mày làm gì đủ trình thừa kế ADN của bố đâu con 🤣
+# nhào vô cắn nhau đi con cặc tật nguyền kia 🤣👎
+# cái con óc chó ảo war bổ túc đúc súc vật như mày có trình ăn bố à con đĩ lồn tật 🥱
+# anh dập nát 2 túi tinh trùng của mày như máy dập rõ mà 👌
+# thk ngu bán dâm cho mấy con lồn già vú nhăn đi lấy tiền vô net chat với cha m hả=))
+# cali ăn cứt cay cha m à=))
+# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
+# anh vắt tinh trùng mày cho thằng cụ già của mày uống mà 🫵😂
+# anh là diêm vương diệt bọn đĩ đú mà con điếm thúi óc cặc như mày mà ơ ơ ơ 🤣
+# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
+https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""]
         
         try:
             for i, msg in enumerate(messages, 1):
