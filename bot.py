@@ -3159,8 +3159,8 @@ class MineView(discord.ui.View):
                 for ex in [-1, 0, 1]:
                     for ey in [-1, 0, 1]:
                 
-                        nx = self.u["cave_px"] + ex
-                        ny = self.u["cave_py"] + ey
+                        nx = center_x + ex
+                        ny = center_y + ey
                 
                         if nx < 0 or nx > 5 or ny < 0 or ny > 9:
                             continue
