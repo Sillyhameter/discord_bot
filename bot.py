@@ -642,6 +642,347 @@ async def on_ready():
 # 無存檔測試版
 # =========================
 
+import asyncio
+import random
+import string
+import discord
+from discord import app_commands
+
+
+HACK_SYMBOLS = list(string.ascii_uppercase + string.digits)
+
+ITEM_SIZE_WEIGHTS = [
+    ((1, 1), 60),
+    ((1, 2), 30),
+    ((2, 2), 7),
+    ((2, 3), 2.5),
+    ((3, 3), 0.5),
+]
+
+ITEM_COUNT_WEIGHTS = [
+    (1, 15),
+    (2, 35),
+    (3, 40),
+    (4, 10),
+]
+
+SEARCH_TIMES = {
+    "1x1": 1,
+    "1x2": 1,
+    "2x2": 1.5,
+    "2x3": 2,
+    "3x3": 3,
+}
+
+
+def weighted_choice(weighted):
+    total = sum(w for _, w in weighted)
+    r = random.uniform(0, total)
+    upto = 0
+
+    for item, weight in weighted:
+        if upto + weight >= r:
+            return item
+        upto += weight
+
+    return weighted[-1][0]
+
+
+def generate_code():
+    return [random.choice(HACK_SYMBOLS) for _ in range(5)]
+
+
+def find_first_fit(grid, w, h):
+    for y in range(4):
+        for x in range(4):
+            if x + w > 4 or y + h > 4:
+                continue
+
+            can_place = True
+
+            for yy in range(y, y + h):
+                for xx in range(x, x + w):
+                    if grid[yy][xx] is not None:
+                        can_place = False
+                        break
+                if not can_place:
+                    break
+
+            if can_place:
+                return x, y
+
+    return None
+
+
+def generate_loot_grid():
+    for _ in range(200):
+        count = weighted_choice(ITEM_COUNT_WEIGHTS)
+        sizes = [weighted_choice(ITEM_SIZE_WEIGHTS) for _ in range(count)]
+
+        grid = [[None for _ in range(4)] for _ in range(4)]
+        items = []
+        success = True
+
+        for idx, (w, h) in enumerate(sizes, start=1):
+            pos = find_first_fit(grid, w, h)
+
+            if pos is None:
+                success = False
+                break
+
+            x, y = pos
+            item_id = str(idx)
+
+            for yy in range(y, y + h):
+                for xx in range(x, x + w):
+                    grid[yy][xx] = item_id
+
+            items.append({
+                "id": item_id,
+                "size": f"{w}x{h}",
+                "x": x,
+                "y": y,
+                "state": "hidden",
+            })
+
+        if success:
+            return grid, items
+
+    grid = [[None for _ in range(4)] for _ in range(4)]
+    grid[0][0] = "1"
+
+    return grid, [{
+        "id": "1",
+        "size": "1x1",
+        "x": 0,
+        "y": 0,
+        "state": "hidden",
+    }]
+
+
+def render_loot_grid(grid, items):
+    item_map = {item["id"]: item for item in items}
+
+    lines = []
+
+    for y in range(4):
+        row = []
+
+        for x in range(4):
+            cell = grid[y][x]
+
+            if cell is None:
+                row.append("⬜️")
+                continue
+
+            item = item_map[cell]
+            state = item.get("state", "hidden")
+
+            if state == "hidden":
+                row.append("⬛️")
+            elif state == "searching":
+                row.append("🔍")
+            elif state == "done":
+                row.append("💩")
+
+        lines.append("".join(row))
+
+    return "\n".join(lines)
+
+
+class BigSafeHackTestView(discord.ui.View):
+    def __init__(self, player):
+        super().__init__(timeout=120)
+
+        self.player = player
+        self.code = generate_code()
+
+        self.rows = [
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+        ]
+
+        self.current_index = 0
+        self.locked = [False] * 5
+        self.failed = False
+        self.opened = False
+
+        self.tick = 0
+        self.message = None
+        self.task = None
+
+        self.loot_grid = None
+        self.loot_items = None
+        self.searching_loot = False
+
+    def render_slot(self):
+        top = "  ".join(self.rows[0])
+
+        mid_cells = []
+
+        for i, ch in enumerate(self.rows[1]):
+            if self.locked[i]:
+                mid_cells.append(f" {ch} ")
+            elif i == self.current_index:
+                if self.failed:
+                    mid_cells.append(f"[{ch}]")
+                else:
+                    mid_cells.append(f"[{ch}]")
+            else:
+                mid_cells.append(f" {ch} ")
+
+        mid = " ".join(mid_cells)
+        bottom = "  ".join(self.rows[2])
+
+        code_line = " ".join(
+            f"✅{c}" if self.locked[i] else c
+            for i, c in enumerate(self.code)
+        )
+
+        return (
+            f"目標密碼：`{code_line}`\n"
+            f"目前進度：**{self.current_index + 1}/5**\n\n"
+            "```text\n"
+            f"{top}\n"
+            "---------------------\n"
+            f"{mid}\n"
+            "---------------------\n"
+            f"{bottom}\n"
+            "```\n"
+            "按下「停止」讓框框停在當前密碼。"
+        )
+
+    def build_embed(self):
+        if self.opened:
+            return discord.Embed(
+                title="大保險已開啟｜正在搜索",
+                description=render_loot_grid(self.loot_grid, self.loot_items),
+                color=0x00ff99
+            )
+
+        return discord.Embed(
+            title="大保險破譯測試",
+            description=self.render_slot(),
+            color=0xff3333 if self.failed else 0xffcc00
+        )
+
+    async def start_loop(self):
+        while not self.opened:
+            await asyncio.sleep(0.5)
+
+            if self.failed:
+                continue
+
+            self.tick += 1
+
+            for row in range(3):
+                for col in range(5):
+                    if self.locked[col]:
+                        self.rows[row][col] = self.code[col]
+                    else:
+                        if self.tick % 5 == 0:
+                            self.rows[row][col] = self.code[col]
+                        else:
+                            self.rows[row][col] = random.choice(HACK_SYMBOLS)
+
+            if self.message:
+                await self.message.edit(embed=self.build_embed(), view=self)
+
+    async def reveal_loot_loop(self):
+        self.searching_loot = True
+        self.loot_grid, self.loot_items = generate_loot_grid()
+
+        await self.message.edit(embed=self.build_embed(), view=None)
+
+        for item in self.loot_items:
+            item["state"] = "searching"
+            await self.message.edit(embed=self.build_embed(), view=None)
+
+            await asyncio.sleep(SEARCH_TIMES[item["size"]])
+
+            item["state"] = "done"
+            await self.message.edit(embed=self.build_embed(), view=None)
+
+        self.searching_loot = False
+
+    @discord.ui.button(label="停止", style=discord.ButtonStyle.danger)
+    async def stop_button(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+        if interaction.user.id != self.player.id:
+            return await interaction.response.send_message(
+                "這不是你的保險箱。",
+                ephemeral=True
+            )
+
+        await interaction.response.defer()
+
+        current = self.rows[1][self.current_index]
+        target = self.code[self.current_index]
+
+        if current == target:
+            self.locked[self.current_index] = True
+            self.rows[1][self.current_index] = target
+            self.current_index += 1
+
+            if self.current_index >= 5:
+                self.opened = True
+                self.clear_items()
+
+                if self.task:
+                    self.task.cancel()
+
+                await interaction.message.edit(
+                    embed=discord.Embed(
+                        title="大保險已開啟",
+                        description="正在打開容器...",
+                        color=0x00ff99
+                    ),
+                    view=None
+                )
+
+                return await self.reveal_loot_loop()
+
+            return await interaction.message.edit(
+                embed=self.build_embed(),
+                view=self
+            )
+
+        self.failed = True
+        await interaction.message.edit(embed=self.build_embed(), view=self)
+
+        await asyncio.sleep(2)
+
+        self.failed = False
+        await interaction.message.edit(embed=self.build_embed(), view=self)
+
+    async def on_timeout(self):
+        if self.task:
+            self.task.cancel()
+
+        self.clear_items()
+
+        if self.message:
+            await self.message.edit(view=None)
+
+
+@tree.command(name="bigsafe_test", description="大保險破譯測試")
+@app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+async def bigsafe_test(interaction: discord.Interaction):
+    view = BigSafeHackTestView(interaction.user)
+
+    await interaction.response.send_message(
+        embed=view.build_embed(),
+        view=view
+    )
+
+    msg = await interaction.original_response()
+    view.message = msg
+    view.task = asyncio.create_task(view.start_loop())
+
 DELTA_LOCATIONS = {
     "遊客中心": ["阿薩拉營地", "行政樓"],
     "阿薩拉營地": ["變電站", "遊客中心"],
