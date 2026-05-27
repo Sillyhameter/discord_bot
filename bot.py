@@ -2525,7 +2525,7 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
    🔱Admin: https://www.facebook.com/nhoanqnhutdev
    https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
             """# @everyone
-# thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))=))
+# thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))
 # con má mày tới tháng là lại phun nước máu lồn cho thk cha dượng mày uống
 # Nghèo bần hèn bị cha mày đứng trên đạp đầu lũ đú chúng mày cha đi lên
 # Cha mày hóa thân thành hắc bạch vô thường cha mày bắt hồn đĩ mẹ mày xuống chầu diêm vương
@@ -2535,7 +2535,7 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
 # thằng óc chó trăn chối điều cuối cùng gì trước khi anh cầm đao phủ anh rã vô não chó mày cho mày tử vong không á 😁🤟
 # cái lồn mẹ mày tật nguyền đến mức đẻ ra sản phẩm lỗi của con người vậy cơ à 🗿🤟
 # mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  🤣🤙
-# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=))=))
+# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=)
 # cả họ nhà mày phải xếp hàng lần lượt bú dái t mà🤣🤣
 # thằng đầu đinh ở nhà mái tôn lấy lá chuối đắp lồn mơ ước được ở nhà cao cửa rộng =))
 # thằng này ăn và khen chubin anh singu khen ngon quá=))
@@ -2548,8 +2548,6 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
 # thk ngu bán dâm cho mấy con lồn già vú nhăn đi lấy tiền vô net chat với cha m hả=))
 # cali ăn cứt cay cha m à=))
 # thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
-# anh vắt tinh trùng mày cho thằng cụ già của mày uống mà 🫵😂
-# anh là diêm vương diệt bọn đĩ đú mà con điếm thúi óc cặc như mày mà ơ ơ ơ 🤣
 https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""]
         
         try:
