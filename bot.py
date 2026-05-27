@@ -2550,7 +2550,6 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
 # thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
 # anh vắt tinh trùng mày cho thằng cụ già của mày uống mà 🫵😂
 # anh là diêm vương diệt bọn đĩ đú mà con điếm thúi óc cặc như mày mà ơ ơ ơ 🤣
-# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
 https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""]
         
         try:
