@@ -646,10 +646,12 @@ async def on_ready():
 HACK_SYMBOLS = list(string.ascii_uppercase + string.digits)
 
 ITEM_SIZE_WEIGHTS = [
-    ((1, 1), 60),
-    ((1, 2), 30),
-    ((2, 2), 7),
-    ((2, 3), 2.5),
+    ((1, 1), 55.5),
+    ((1, 2), 10),
+    ((2, 1), 20),
+    ((2, 2), 5),
+    ((2, 3), 4.5),
+    ((3, 2), 4.5),
     ((3, 3), 0.5),
 ]
 
@@ -660,12 +662,86 @@ ITEM_COUNT_WEIGHTS = [
     (4, 10),
 ]
 
-SEARCH_TIMES = {
-    "1x1": 1,
-    "1x2": 1,
-    "2x2": 1.5,
-    "2x3": 2,
-    "3x3": 3,
+QUALITY_SEARCH_TIMES = {
+    "blue": 1,
+    "purple": 1.5,
+    "gold": 2,
+    "red": 3,
+    "diamond": 3,
+}
+
+QUALITY_WEIGHTS_BY_SIZE = {
+    "1x1": [
+        ("blue", 50),
+        ("purple", 30),
+        ("gold", 15),
+        ("red", 4.9),
+        ("diamond", 0.1),
+    ],
+    "1x2": [
+        ("purple", 75),
+        ("gold", 20),
+        ("red", 5),
+    ],
+    "2x1": [
+        ("blue", 60),
+        ("purple", 25),
+        ("gold", 12),
+        ("red", 3),
+    ],
+    "2x2": [
+        ("gold", 70),
+        ("red", 30),
+    ],
+    "2x3": [
+        ("purple", 70),
+        ("gold", 20),
+        ("red", 10),
+    ],
+    "3x2": [
+        ("purple", 80),
+        ("red", 20),
+    ],
+    "3x3": [
+        ("red", 100),
+    ],
+}
+
+ITEM_POOL = {
+    "1x1": {
+        "blue": ["海盜銀幣"],
+        "purple": ["后妃耳環", "海盜彎刀", "圖騰箭矢"],
+        "gold": ["亮閃閃的海盜金幣", "阿薩拉的特色酒杯", "精妙八音盒"],
+        "red": ["塞伊德的懷錶", "名貴機械表"],
+        "diamond": ["非洲之心💎"],
+    },
+    "1x2": {
+        "purple": ["完整牛角"],
+        "gold": ["金枝桂冠"],
+        "red": ["棘爪龍化石"],
+    },
+    "2x1": {
+        "blue": ["跳舞的女郎", "古老的海盜望遠鏡", "初級子彈生產零件"],
+        "purple": ["黃金飾章", "阿薩拉風情水壺", "阿薩拉特色水壺"],
+        "gold": ["荷美爾陶俑"],
+        "red": ["奧莉薇婭香檳", "萬足金條"],
+    },
+    "2x2": {
+        "gold": ["座鐘"],
+        "red": ["黃金瞪羚"],
+    },
+    "2x3": {
+        "purple": ["儀典匕首"],
+        "gold": ["本地特色首飾"],
+        "red": ["步戰車模型"],
+    },
+    "3x2": {
+        "purple": ["馬賽克檯燈"],
+        "red": ["克勞迪烏斯半身像", "雷斯的留聲機"],
+    },
+    "3x3": {
+        "red": ["主戰坦克模型", "印象派名畫"],
+    },
 }
 
 
@@ -726,6 +802,9 @@ def generate_loot_grid():
 
             x, y = pos
             item_id = str(idx)
+            size_key = f"{w}x{h}"
+            quality = weighted_choice(QUALITY_WEIGHTS_BY_SIZE[size_key])
+            name = random.choice(ITEM_POOL[size_key][quality])
 
             for yy in range(y, y + h):
                 for xx in range(x, x + w):
@@ -733,7 +812,9 @@ def generate_loot_grid():
 
             items.append({
                 "id": item_id,
-                "size": f"{w}x{h}",
+                "size": size_key,
+                "quality": quality,
+                "name": name,
                 "x": x,
                 "y": y,
                 "state": "hidden",
@@ -748,6 +829,8 @@ def generate_loot_grid():
     return grid, [{
         "id": "1",
         "size": "1x1",
+        "quality": "blue",
+        "name": "海盜銀幣",
         "x": 0,
         "y": 0,
         "state": "hidden",
@@ -756,6 +839,14 @@ def generate_loot_grid():
 
 def render_loot_grid(grid, items):
     item_map = {item["id"]: item for item in items}
+
+    quality_icons = {
+        "blue": "🟦",
+        "purple": "🟪",
+        "gold": "🟨",
+        "red": "🟥",
+        "diamond": "💎",
+    }
 
     lines = []
 
@@ -777,11 +868,26 @@ def render_loot_grid(grid, items):
             elif state == "searching":
                 row.append("🔍")
             elif state == "done":
-                row.append("💩")
+                row.append(quality_icons[item["quality"]])
 
         lines.append("".join(row))
 
-    return "\n".join(lines)
+    revealed_items = [
+        item for item in items
+        if item["state"] == "done"
+    ]
+
+    loot_lines = []
+
+    for idx, item in enumerate(revealed_items, start=1):
+        loot_lines.append(f"{idx}. {item['name']}")
+
+    result = "\n".join(lines)
+
+    if loot_lines:
+        result += "\n\n" + "\n".join(loot_lines)
+
+    return result
 
 
 class BigSafeHackTestView(discord.ui.View):
@@ -790,14 +896,15 @@ class BigSafeHackTestView(discord.ui.View):
 
         self.player = player
         self.code = generate_code()
-        self.code_countdowns = [
-            random.randint(1, 5) for _ in range(5)
-        ]
 
         self.rows = [
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
+        ]
+
+        self.code_countdowns = [
+            random.randint(1, 5) for _ in range(5)
         ]
 
         self.current_index = 0
@@ -841,9 +948,9 @@ class BigSafeHackTestView(discord.ui.View):
             f"目前進度：**{self.current_index + 1}/5**\n\n"
             "```text\n"
             f"{top}\n"
-            "----------------------\n"
+            "------------------------------------\n"
             f"{mid}\n"
-            "----------------------\n"
+            "------------------------------------\n"
             f"{bottom}\n"
             "```\n"
             "按下「停止」讓框框停在當前密碼。"
@@ -898,13 +1005,9 @@ class BigSafeHackTestView(discord.ui.View):
                     self.code_countdowns[col] -= 1
 
                     if self.code_countdowns[col] <= 0:
-
                         new_top.append(self.code[col])
-
                         self.code_countdowns[col] = random.randint(1, 5)
-
                     else:
-
                         new_top.append(random.choice(HACK_SYMBOLS))
 
                 old_top = self.rows[0][:]
@@ -912,15 +1015,16 @@ class BigSafeHackTestView(discord.ui.View):
 
                 for col in range(5):
                     if self.locked[col]:
-                        
                         self.rows[1][col] = self.code[col]
-                        
                     else:
                         self.rows[0][col] = new_top[col]
                         self.rows[1][col] = old_top[col]
                         self.rows[2][col] = old_mid[col]
 
-                await self.safe_edit(embed=self.build_embed(), view=self)
+                await self.safe_edit(
+                    embed=self.build_embed(),
+                    view=self
+                )
 
         except asyncio.CancelledError:
             pass
@@ -935,12 +1039,13 @@ class BigSafeHackTestView(discord.ui.View):
             item["state"] = "searching"
             await self.safe_edit(embed=self.build_embed(), view=None)
 
-            await asyncio.sleep(SEARCH_TIMES[item["size"]])
+            await asyncio.sleep(QUALITY_SEARCH_TIMES[item["quality"]])
 
             item["state"] = "done"
             await self.safe_edit(embed=self.build_embed(), view=None)
 
         self.searching_loot = False
+
         await self.safe_edit(
             embed=discord.Embed(
                 title="大保險搜索完畢",
@@ -969,9 +1074,7 @@ class BigSafeHackTestView(discord.ui.View):
 
         if current == target:
             self.locked[self.current_index] = True
-            
             self.rows[1][self.current_index] = target
-            
             self.current_index += 1
 
             if self.current_index >= 5:
