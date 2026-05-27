@@ -677,9 +677,9 @@ QUALITY_SEARCH_TIMES = {
 QUALITY_WEIGHTS_BY_SIZE = {
     "1x1": [
         ("blue", 50),
-        ("purple", 30),
+        ("purple", 32.9),
         ("gold", 15),
-        ("red", 4.9),
+        ("red", 2),
         ("diamond", 0.1),
     ],
     "1x2": [
@@ -694,8 +694,8 @@ QUALITY_WEIGHTS_BY_SIZE = {
         ("red", 3),
     ],
     "2x2": [
-        ("gold", 70),
-        ("red", 30),
+        ("gold", 85),
+        ("red", 15),
     ],
     "2x3": [
         ("purple", 70),
