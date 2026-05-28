@@ -2870,10 +2870,7 @@ class DeltaContainerLootView(discord.ui.View):
 
             await asyncio.sleep(QUALITY_SEARCH_TIMES.get(item["quality"], 1))
 
-            if item["name"] == "啥也沒有":
-                item["state"] = "taken"
-            else:
-                item["state"] = "done"
+            item["state"] = "done"
 
             await self.safe_edit()
 
