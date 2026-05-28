@@ -2955,6 +2955,7 @@ class DeltaBigSafeHackView(discord.ui.View):
         self.locked = [False] * 5
         self.failed = False
         self.opened = False
+        self.finishing = False
 
         self.message = None
         self.task = None
@@ -3011,7 +3012,7 @@ class DeltaBigSafeHackView(discord.ui.View):
 
     async def start_loop(self):
         try:
-            while not self.opened:
+            while not self.opened and not self.finishing:
                 await asyncio.sleep(1.0)
 
                 if self.failed:
@@ -3056,10 +3057,8 @@ class DeltaBigSafeHackView(discord.ui.View):
                 ephemeral=True
             )
 
-        await interaction.response.defer()
-
-        if self.opened or self.current_index >= 5:
-            return
+        if self.finishing or self.opened or self.current_index >= 5:
+            return await interaction.response.defer()
 
         current = self.rows[1][self.current_index]
         target = self.code[self.current_index]
@@ -3070,6 +3069,7 @@ class DeltaBigSafeHackView(discord.ui.View):
             self.current_index += 1
 
             if self.current_index >= 5:
+                self.finishing = True
                 self.opened = True
                 self.container["hacked"] = True
                 self.clear_items()
@@ -3080,21 +3080,29 @@ class DeltaBigSafeHackView(discord.ui.View):
                 view = DeltaContainerLootView(self.game, self.container)
 
                 try:
-                    await self.message.edit(
+                    await interaction.response.edit_message(
                         embed=view.build_embed(),
                         view=view
                     )
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     return
 
-                view.message = self.message
+                msg = await interaction.original_response()
+                view.message = msg
                 asyncio.create_task(view.reveal_loop())
                 return
 
-            return await self.safe_edit()
+            return await interaction.response.edit_message(
+                embed=self.build_embed(),
+                view=self
+            )
 
         self.failed = True
-        await self.safe_edit()
+
+        await interaction.response.edit_message(
+            embed=self.build_embed(),
+            view=self
+        )
 
         await asyncio.sleep(2)
 
