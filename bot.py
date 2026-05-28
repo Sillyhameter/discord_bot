@@ -3907,9 +3907,6 @@ def init_user(uid):
     u.setdefault("max_depth", 0)
     u.setdefault("level", 1)
 
-    # ✅ 防止舊玩家資料沒有鎬子，導致 tier = 0
-    if not any(str(item).startswith("Pickaxe Lvl") for item in u["inventory"]):
-        u["inventory"].append("Pickaxe Lvl 1")
 
     return u
 
@@ -4897,7 +4894,13 @@ class CaveView(discord.ui.View):
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def mine(interaction: discord.Interaction):
     uid = str(interaction.user.id)
-    init_user(uid)
+    u = init_user(uid)
+
+    if not any(str(item).startswith("Pickaxe Lvl") for item in u.get("inventory", [])):
+        return await interaction.response.send_message(
+            "❌ You need to buy a pickaxe before mining.",
+            ephemeral=True
+        )
 
     view = MineView(uid)
     active_games[uid] = view
