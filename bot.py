@@ -3049,6 +3049,9 @@ class DeltaBigSafeHackView(discord.ui.View):
             return await interaction.response.send_message("這不是你的保險箱。", ephemeral=True)
 
         await interaction.response.defer()
+        if self.opened or self.current_index >= 5:
+
+            return
 
         current = self.rows[1][self.current_index]
         target = self.code[self.current_index]
@@ -3061,6 +3064,7 @@ class DeltaBigSafeHackView(discord.ui.View):
             if self.current_index >= 5:
                 self.opened = True
                 self.container["hacked"] = True
+                self.clear_items()
 
                 if self.task:
                     self.task.cancel()
