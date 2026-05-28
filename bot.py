@@ -898,19 +898,31 @@ def render_loot_grid(grid, items):
     ]
 
     loot_lines = []
+    total_value = 0
 
     for idx, item in enumerate(
         revealed_items,
         start=1
     ):
+        value = ITEM_VALUES.get(
+            item["name"],
+            0
+        )
+
+        total_value += value
+
         loot_lines.append(
-            f"{idx}. {item['name']}"
+            f"{idx}. {item['name']} ({value:,})"
         )
 
     result = "\n".join(lines)
 
     if loot_lines:
-        result += "\n\n" + "\n".join(loot_lines)
+        result += (
+            "\n\n"
+            + "\n".join(loot_lines)
+            + f"\n\n💰 Total Value: {total_value:,}"
+        )
 
     return result
 
