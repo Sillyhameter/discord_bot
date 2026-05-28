@@ -3976,8 +3976,7 @@ def gen_block(x, y):
             b = {"emoji": "🟥", "hp": 2, "coins": 0, "xp": 1}
         elif roll < 15.1:
             b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1, "Explosion": True}
-        elif roll < 35.1:
-            b = {"emoji": "🕳️", "hp": 1, "coins": 0, "xp": 0, "Cave": True}
+        
         else:
             b = {"emoji": "🟫", "hp": 1, "coins": 0, "xp": 1}
 
