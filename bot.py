@@ -3001,8 +3001,11 @@ class DeltaBigSafeHackView(discord.ui.View):
 
         async with self.edit_lock:
             try:
-                await self.message.edit(embed=self.build_embed(), view=self)
-            except:
+                await self.message.edit(
+                    embed=self.build_embed(),
+                    view=self
+                )
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 if self.task:
                     self.task.cancel()
 
@@ -3015,12 +3018,14 @@ class DeltaBigSafeHackView(discord.ui.View):
                     continue
 
                 new_top = []
+
                 for col in range(5):
                     if self.locked[col]:
                         new_top.append(random.choice(HACK_SYMBOLS))
                         continue
 
                     self.code_countdowns[col] -= 1
+
                     if self.code_countdowns[col] <= 0:
                         new_top.append(self.code[col])
                         self.code_countdowns[col] = random.randint(1, 5)
@@ -3046,11 +3051,14 @@ class DeltaBigSafeHackView(discord.ui.View):
     @discord.ui.button(label="停止", style=discord.ButtonStyle.danger)
     async def stop_button(self, interaction, button):
         if interaction.user.id != self.player.id:
-            return await interaction.response.send_message("這不是你的保險箱。", ephemeral=True)
+            return await interaction.response.send_message(
+                "這不是你的保險箱。",
+                ephemeral=True
+            )
 
         await interaction.response.defer()
-        if self.opened or self.current_index >= 5:
 
+        if self.opened or self.current_index >= 5:
             return
 
         current = self.rows[1][self.current_index]
@@ -3070,11 +3078,16 @@ class DeltaBigSafeHackView(discord.ui.View):
                     self.task.cancel()
 
                 view = DeltaContainerLootView(self.game, self.container)
-                await interaction.message.edit(
-                    embed=view.build_embed(),
-                    view=view
-                )
-                view.message = interaction.message
+
+                try:
+                    await self.message.edit(
+                        embed=view.build_embed(),
+                        view=view
+                    )
+                except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                    return
+
+                view.message = self.message
                 asyncio.create_task(view.reveal_loop())
                 return
 
@@ -3091,6 +3104,7 @@ class DeltaBigSafeHackView(discord.ui.View):
     async def on_timeout(self):
         if self.task:
             self.task.cancel()
+
         self.clear_items()
         await self.safe_edit()
 
