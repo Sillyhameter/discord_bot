@@ -2248,6 +2248,9 @@ def generate_container(container_type):
                 item = pick_electronic_item(quality, "server")
             elif container_type == "小保險":
                 item = pick_small_safe_item()
+            elif container_type == "大保險":
+
+                item = pick_item_from_pool(ART_ITEMS, quality)
             else:
                 item = pick_general_item(quality, high=(container_type == "高級儲物箱"))
 
