@@ -1505,6 +1505,12 @@ class DeltaForceView(discord.ui.View):
     def __init__(self, player):
         super().__init__(timeout=180)
 
+        self.backpack = []
+        self.secure_box = []
+        self.nearby_items = []
+        self.found_containers = {}
+        self.marked_spots = {}
+
         self.player = player
         self.ap = 30
         self.location = random.choice(SPAWNS)
@@ -1590,6 +1596,7 @@ class DeltaForceView(discord.ui.View):
         self.add_item(DeltaSearchButton(self))
         self.add_item(DeltaCarefulButton(self))
         self.add_item(DeltaExtractButton(self))
+        self.add_item(DeltaBagButton(self)
 
     def build_embed(self):
         if not self.started:
@@ -1744,28 +1751,15 @@ class DeltaSearchButton(discord.ui.Button):
         game = self.game
 
         if interaction.user.id != game.player.id:
-            return await interaction.response.send_message("這不是你的行動。", ephemeral=True)
+            return await interaction.response.send_message(
+                "這不是你的行動。",
+                ephemeral=True
+            )
 
-        place_key = f"{game.location}:{game.sub_location or 'main'}"
-
-        if place_key in game.searched_places:
-            game.log = "這個位置已經被搜索過了。"
-            return await game.update(interaction)
-
-        if game.ap < 0.5:
-            game.log = "行動點不足，無法搜索。"
-            return await game.update(interaction)
-
-        game.searched_places.add(place_key)
-
-        gain = random.randint(1000, 5000) * RISK.get(game.location, 2)
-        game.loot += gain
-        game.ap -= 0.5
-        game.log = f"你搜索了一圈，找到價值 {gain} 的物資。"
-
-        game.refresh_danger()
-
-        await game.update(interaction)
+        await interaction.response.edit_message(
+            embed=build_search_embed(game),
+            view=DeltaSearchMenuView(game)
+        )
 
 
 class DeltaCarefulButton(discord.ui.Button):
@@ -1825,6 +1819,1279 @@ class DeltaExtractButton(discord.ui.Button):
 
         await interaction.response.edit_message(embed=embed, view=None)
 
+# =========================
+# DELTA CONTAINER / BAG SYSTEM
+# =========================
+
+BACKPACK_CAPACITY = 30
+SECURE_CAPACITY = 6
+
+QUALITY_ICONS = {
+    "junk": "💩",
+    "blue": "🟦",
+    "purple": "🟪",
+    "gold": "🟨",
+    "red": "🟥",
+    "diamond": "💎",
+}
+
+QUALITY_SEARCH_TIMES = {
+    "junk": 1,
+    "blue": 1,
+    "purple": 1.5,
+    "gold": 2,
+    "red": 3,
+    "diamond": 3,
+}
+
+ITEM_VALUES = {
+    "啥也沒有": 0,
+    "海盜銀幣": 80,
+    "后妃耳環": 120,
+    "海盜彎刀": 240,
+    "圖騰箭矢": 160,
+    "亮閃閃的海盜金幣": 560,
+    "阿薩拉的特色酒杯": 700,
+    "精妙八音盒": 660,
+    "塞伊德的懷錶": 1800,
+    "名貴機械表": 2200,
+    "非洲之心💎": 131400,
+    "完整牛角": 180,
+    "金枝桂冠": 800,
+    "棘爪龍化石": 3200,
+    "跳舞的女郎": 130,
+    "古老的海盜望遠鏡": 150,
+    "初級子彈生產零件": 200,
+    "黃金飾章": 260,
+    "阿薩拉風情酒壺": 320,
+    "阿薩拉特色水壺": 360,
+    "荷美爾陶俑": 760,
+    "奧莉薇婭香檳": 1860,
+    "萬足金條": 2000,
+    "座鐘": 2050,
+    "黃金瞪羚": 5280,
+    "黃金鱷魚頭": 6480,
+    "儀典匕首": 980,
+    "本地特色首飾": 3600,
+    "步戰車模型": 12500,
+    "馬賽克檯燈": 860,
+    "克勞迪烏斯半身像": 12000,
+    "雷斯的留聲機": 13200,
+    "主戰坦克模型": 22500,
+    "印象派名畫": 21000,
+
+    "存儲卡": 60,
+    "攝像頭": 120,
+    "顯示屏": 320,
+    "電子干擾器": 130,
+    "固態硬盤": 300,
+    "內存條": 250,
+    "軍事情報": 150,
+    "HIFI卡帶": 340,
+    "專業聲卡": 430,
+    "ASOS電腦主板": 460,
+    "CPU": 700,
+    "高速固態硬盤": 690,
+    "軍用彈道計算器": 1200,
+    "顯卡": 3500,
+    "軍用終端": 4200,
+    "軍用信息終端": 9800,
+    "曼德爾超算單元": 18750,
+    "刀片服務器": 19500,
+    "高速磁盤陣列": 26000,
+
+    "低級燃料": 150,
+    "軍用罐頭": 150,
+    "糖三角": 110,
+    "可樂": 120,
+    "清新橘味能量膠囊": 400,
+    "生津檸檬茶": 180,
+    "信號棒": 220,
+    "已損壞的熱像儀": 460,
+    "電動車電池": 1000,
+    "掃拖一體機器人": 18000,
+    "復甦呼吸機": 56000,
+    "碳纖維板": 20000,
+}
+
+ART_ITEMS = [
+    ("海盜銀幣", "1x1", 1, 1, "blue"),
+    ("后妃耳環", "1x1", 1, 1, "purple"),
+    ("海盜彎刀", "1x1", 1, 1, "purple"),
+    ("圖騰箭矢", "1x1", 1, 1, "purple"),
+    ("亮閃閃的海盜金幣", "1x1", 1, 1, "gold"),
+    ("阿薩拉的特色酒杯", "1x1", 1, 1, "gold"),
+    ("精妙八音盒", "1x1", 1, 1, "gold"),
+    ("塞伊德的懷錶", "1x1", 1, 1, "red"),
+    ("名貴機械表", "1x1", 1, 1, "red"),
+    ("非洲之心💎", "1x1", 1, 1, "diamond"),
+    ("完整牛角", "1x2", 2, 1, "purple"),
+    ("金枝桂冠", "1x2", 2, 1, "gold"),
+    ("棘爪龍化石", "1x2", 2, 1, "red"),
+    ("跳舞的女郎", "2x1", 1, 2, "blue"),
+    ("古老的海盜望遠鏡", "2x1", 1, 2, "blue"),
+    ("初級子彈生產零件", "2x1", 1, 2, "blue"),
+    ("黃金飾章", "2x1", 1, 2, "purple"),
+    ("阿薩拉風情酒壺", "2x1", 1, 2, "purple"),
+    ("阿薩拉特色水壺", "2x1", 1, 2, "purple"),
+    ("荷美爾陶俑", "2x1", 1, 2, "gold"),
+    ("奧莉薇婭香檳", "2x1", 1, 2, "red"),
+    ("萬足金條", "2x1", 1, 2, "red"),
+    ("座鐘", "2x2", 2, 2, "gold"),
+    ("黃金瞪羚", "2x2", 2, 2, "red"),
+    ("黃金鱷魚頭", "2x2", 2, 2, "red"),
+    ("儀典匕首", "2x3", 3, 2, "purple"),
+    ("本地特色首飾", "2x3", 3, 2, "gold"),
+    ("步戰車模型", "2x3", 3, 2, "red"),
+    ("馬賽克檯燈", "3x2", 2, 3, "purple"),
+    ("克勞迪烏斯半身像", "3x2", 2, 3, "red"),
+    ("雷斯的留聲機", "3x2", 2, 3, "red"),
+    ("主戰坦克模型", "3x3", 3, 3, "red"),
+    ("印象派名畫", "3x3", 3, 3, "red"),
+]
+
+ELECTRONIC_ITEMS = [
+    ("存儲卡", "1x1", 1, 1, "blue"),
+    ("攝像頭", "1x1", 1, 1, "blue"),
+    ("顯示屏", "2x2", 2, 2, "blue"),
+    ("電子干擾器", "1x1", 1, 1, "purple"),
+    ("固態硬盤", "1x1", 1, 1, "purple"),
+    ("內存條", "1x1", 1, 1, "purple"),
+    ("軍事情報", "1x1", 1, 1, "purple"),
+    ("HIFI卡帶", "1x2", 2, 1, "purple"),
+    ("專業聲卡", "1x2", 2, 1, "purple"),
+    ("ASOS電腦主板", "2x2", 2, 2, "purple"),
+    ("CPU", "1x1", 1, 1, "gold"),
+    ("高速固態硬盤", "1x1", 1, 1, "gold"),
+    ("軍用彈道計算器", "1x2", 2, 1, "gold"),
+    ("顯卡", "1x2", 2, 1, "red"),
+    ("軍用終端", "1x2", 2, 1, "red"),
+    ("軍用信息終端", "2x3", 3, 2, "red"),
+    ("曼德爾超算單元", "3x3", 3, 3, "red"),
+    ("刀片服務器", "3x4", 3, 4, "red"),
+    ("高速磁盤陣列", "3x4", 4, 3, "red"),
+]
+
+OTHER_ITEMS = [
+    ("低級燃料", "1x1", 1, 1, "blue"),
+    ("軍用罐頭", "1x1", 1, 1, "blue"),
+    ("糖三角", "1x1", 1, 1, "blue"),
+    ("可樂", "1x1", 1, 1, "blue"),
+    ("清新橘味能量膠囊", "1x1", 1, 1, "purple"),
+    ("生津檸檬茶", "1x1", 1, 1, "purple"),
+    ("信號棒", "1x1", 1, 1, "purple"),
+    ("已損壞的熱像儀", "1x1", 1, 1, "purple"),
+    ("電動車電池", "2x3", 3, 2, "purple"),
+    ("掃拖一體機器人", "3x3", 3, 3, "red"),
+    ("復甦呼吸機", "3x3", 3, 3, "red"),
+    ("碳纖維板", "3x3", 3, 3, "red"),
+]
+
+
+def make_item(name, size, w, h, quality):
+    return {
+        "name": name,
+        "size": size,
+        "w": w,
+        "h": h,
+        "cells": w * h,
+        "quality": quality,
+        "value": ITEM_VALUES.get(name, 0),
+        "state": "hidden",
+    }
+
+
+def weighted_choice(weighted):
+    total = sum(w for _, w in weighted)
+    r = random.uniform(0, total)
+    upto = 0
+    for item, weight in weighted:
+        if upto + weight >= r:
+            return item
+        upto += weight
+    return weighted[-1][0]
+
+
+def used_cells(items):
+    return sum(item.get("cells", 1) for item in items)
+
+
+def can_fit(items, cap, item):
+    return used_cells(items) + item.get("cells", 1) <= cap
+
+
+def storage_text(items):
+    if not items:
+        return "空"
+    return "\n".join(
+        f"{i+1}. {QUALITY_ICONS.get(it['quality'], '⬜️')} {it['name']} ({it['value']:,})｜{it['cells']}格"
+        for i, it in enumerate(items)
+    )
+
+
+def total_value(items):
+    return sum(it.get("value", 0) for it in items)
+
+
+def find_first_fit(grid, w, h):
+    height = len(grid)
+    width = len(grid[0])
+
+    for y in range(height):
+        for x in range(width):
+            if x + w > width or y + h > height:
+                continue
+
+            ok = True
+            for yy in range(y, y + h):
+                for xx in range(x, x + w):
+                    if grid[yy][xx] is not None:
+                        ok = False
+                        break
+                if not ok:
+                    break
+
+            if ok:
+                return x, y
+
+    return None
+
+
+def place_items(width, height, items):
+    grid = [[None for _ in range(width)] for _ in range(height)]
+
+    for idx, item in enumerate(items, start=1):
+        pos = find_first_fit(grid, item["w"], item["h"])
+        if pos is None:
+            return None
+
+        x, y = pos
+        item["id"] = str(idx)
+        item["x"] = x
+        item["y"] = y
+
+        for yy in range(y, y + item["h"]):
+            for xx in range(x, x + item["w"]):
+                grid[yy][xx] = item["id"]
+
+    return grid
+
+
+def render_container_grid(container):
+    grid = container["grid"]
+    items = container["items"]
+    item_map = {it["id"]: it for it in items}
+
+    lines = []
+    for y in range(len(grid)):
+        row = []
+        for x in range(len(grid[0])):
+            cell = grid[y][x]
+
+            if cell is None:
+                row.append("⬜️")
+                continue
+
+            item = item_map[cell]
+            state = item.get("state", "hidden")
+
+            if state == "hidden":
+                row.append("⬛️")
+            elif state == "searching":
+                row.append("🔍")
+            elif state == "taken":
+                row.append("⬜️")
+            else:
+                row.append(QUALITY_ICONS.get(item["quality"], "⬜️"))
+
+        lines.append("".join(row))
+
+    revealed = [
+        it for it in items
+        if it.get("state") == "done"
+    ]
+
+    text = "\n".join(lines)
+
+    if revealed:
+        text += "\n\n"
+        text += "\n".join(
+            f"{i+1}. {it['name']} ({it['value']:,})"
+            for i, it in enumerate(revealed)
+        )
+
+    return text
+
+
+def pick_item_from_pool(pool, quality=None, max_cells=None, banned_names=None):
+    banned_names = banned_names or set()
+
+    candidates = []
+    for raw in pool:
+        name, size, w, h, q = raw
+
+        if name in banned_names:
+            continue
+
+        if quality and q != quality:
+            continue
+
+        if max_cells and w * h > max_cells:
+            continue
+
+        candidates.append(raw)
+
+    if not candidates:
+        return None
+
+    return make_item(*random.choice(candidates))
+
+
+def make_junk_item():
+    size_key, w, h = weighted_choice([
+        (("1x1", 1, 1), 80),
+        (("1x2", 2, 1), 7.5),
+        (("2x1", 1, 2), 7.5),
+        (("2x2", 2, 2), 3),
+        (("2x3", 3, 2), 0.75),
+        (("3x2", 2, 3), 0.75),
+        (("3x3", 3, 3), 0.5),
+    ])
+    return make_item("啥也沒有", size_key, w, h, "junk")
+
+
+def pick_general_item(quality, high=False):
+    if quality == "junk":
+        return make_junk_item()
+
+    pool = ART_ITEMS + ELECTRONIC_ITEMS + OTHER_ITEMS
+
+    if quality == "red" and random.random() < 0.9:
+        item = pick_item_from_pool(pool, "red", max_cells=1)
+        if item:
+            return item
+
+    return pick_item_from_pool(pool, quality)
+
+
+def pick_electronic_item(quality, source):
+    banned = set()
+
+    if source == "server":
+        banned.update(["HIFI卡帶", "專業聲卡"])
+
+    if source == "pc":
+        banned.update(["軍用信息終端", "刀片服務器", "高速磁盤陣列"])
+
+    pool = ELECTRONIC_ITEMS
+
+    if quality == "red_6plus":
+        candidates = []
+        for raw in pool:
+            name, size, w, h, q = raw
+            if q == "red" and w * h >= 6 and name not in banned:
+                candidates.append(raw)
+        if not candidates:
+            return None
+        return make_item(*random.choice(candidates))
+
+    if quality == "red_9":
+        candidates = []
+        for raw in pool:
+            name, size, w, h, q = raw
+            if q == "red" and w * h == 9 and name not in banned:
+                candidates.append(raw)
+        if not candidates:
+            return None
+        return make_item(*random.choice(candidates))
+
+    return pick_item_from_pool(pool, quality, banned_names=banned)
+
+
+def pick_small_safe_item():
+    quality = weighted_choice([
+        ("blue", 50),
+        ("purple", 35),
+        ("gold", 12),
+        ("red", 3),
+    ])
+
+    if quality != "red":
+        return pick_item_from_pool(ART_ITEMS, quality)
+
+    art_reds = [
+        raw for raw in ART_ITEMS
+        if raw[4] == "red"
+    ]
+    electronic_big_reds = [
+        raw for raw in ELECTRONIC_ITEMS
+        if raw[4] == "red" and raw[2] * raw[3] >= 6 and raw[2] <= 4 and raw[3] <= 4
+    ]
+
+    return make_item(*random.choice(art_reds + electronic_big_reds))
+
+
+def generate_container(container_type):
+    config = CONTAINER_CONFIGS[container_type]
+    width, height = config["size"]
+
+    for _ in range(200):
+        count = weighted_choice(config["count_weights"])
+        items = []
+
+        for _ in range(count):
+            quality = weighted_choice(config["quality_weights"])
+
+            if container_type == "電腦機箱":
+                item = pick_electronic_item(quality, "pc")
+            elif container_type == "服務器":
+                item = pick_electronic_item(quality, "server")
+            elif container_type == "小保險":
+                item = pick_small_safe_item()
+            else:
+                item = pick_general_item(quality, high=(container_type == "高級儲物箱"))
+
+            if item:
+                items.append(item)
+
+        grid = place_items(width, height, items)
+
+        if grid is not None:
+            return {
+                "name": container_type,
+                "grid": grid,
+                "items": items,
+                "searched": False,
+            }
+
+    fallback = make_item("啥也沒有", "1x1", 1, 1, "junk")
+    grid = place_items(width, height, [fallback])
+    return {
+        "name": container_type,
+        "grid": grid,
+        "items": [fallback],
+        "searched": False,
+    }
+
+
+CONTAINER_CONFIGS = {
+    "抽屜櫃": {
+        "size": (5, 5),
+        "count_weights": [(1, 30), (2, 50), (3, 15), (4, 5)],
+        "quality_weights": [("junk", 70), ("blue", 20), ("purple", 8), ("gold", 1.7), ("red", 0.3)],
+    },
+    "手提箱": {
+        "size": (5, 5),
+        "count_weights": [(1, 30), (2, 50), (3, 15), (4, 5)],
+        "quality_weights": [("junk", 70), ("blue", 20), ("purple", 8), ("gold", 1.7), ("red", 0.3)],
+    },
+    "快遞盒": {
+        "size": (5, 5),
+        "count_weights": [(1, 30), (2, 50), (3, 15), (4, 5)],
+        "quality_weights": [("junk", 70), ("blue", 20), ("purple", 8), ("gold", 1.7), ("red", 0.3)],
+    },
+    "物資箱": {
+        "size": (5, 5),
+        "count_weights": [(1, 30), (2, 50), (3, 15), (4, 5)],
+        "quality_weights": [("junk", 70), ("blue", 20), ("purple", 8), ("gold", 1.7), ("red", 0.3)],
+    },
+    "收納盒": {
+        "size": (5, 5),
+        "count_weights": [(1, 30), (2, 50), (3, 15), (4, 5)],
+        "quality_weights": [("junk", 70), ("blue", 20), ("purple", 8), ("gold", 1.7), ("red", 0.3)],
+    },
+    "高級儲物箱": {
+        "size": (5, 5),
+        "count_weights": [(1, 5), (2, 15), (3, 50), (4, 30)],
+        "quality_weights": [("junk", 65), ("blue", 20), ("purple", 10), ("gold", 4.5), ("red", 0.5)],
+    },
+    "服務器": {
+        "size": (6, 6),
+        "count_weights": [(1, 25), (2, 25), (3, 25), (4, 25)],
+        "quality_weights": [("blue", 60), ("purple", 30), ("gold", 8), ("red", 1.8), ("red_6plus", 0.2)],
+    },
+    "電腦機箱": {
+        "size": (3, 3),
+        "count_weights": [(1, 60), (2, 30), (3, 10)],
+        "quality_weights": [("junk", 30), ("blue", 50), ("purple", 15), ("gold", 4), ("red", 0.9), ("red_9", 0.1)],
+    },
+    "小保險": {
+        "size": (4, 4),
+        "count_weights": [(1, 100)],
+        "quality_weights": [("blue", 50), ("purple", 35), ("gold", 12), ("red", 3)],
+    },
+    "大保險": {
+        "size": (4, 4),
+        "count_weights": [(1, 15), (2, 35), (3, 40), (4, 10)],
+        "quality_weights": [("blue", 50), ("purple", 30), ("gold", 15), ("red", 4.9), ("diamond", 0.1)],
+    },
+}
+
+
+def place_key_of(game):
+    return f"{game.location}:{game.sub_location or 'main'}"
+
+
+def random_containers_for_place():
+    pool = [
+        "抽屜櫃",
+        "手提箱",
+        "快遞盒",
+        "物資箱",
+        "收納盒",
+        "高級儲物箱",
+        "電腦機箱",
+        "服務器",
+    ]
+    count = random.randint(1, 3)
+    return random.sample(pool, count)
+
+
+# =========================
+# BAG VIEWS
+# =========================
+
+class DeltaBagButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="查看背包", style=discord.ButtonStyle.secondary)
+        self.game = game
+
+    async def callback(self, interaction):
+        if interaction.user.id != self.game.player.id:
+            return await interaction.response.send_message("這不是你的背包。", ephemeral=True)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaBagView(self.game)
+        )
+
+
+def build_bag_embed(game):
+    backpack_used = used_cells(game.backpack)
+    secure_used = used_cells(game.secure_box)
+
+    desc = (
+        f"背包容量：**{backpack_used}/{BACKPACK_CAPACITY}**\n"
+        f"保險箱容量：**{secure_used}/{SECURE_CAPACITY}**\n"
+        f"目前總收益：**{total_value(game.backpack) + total_value(game.secure_box):,}**\n\n"
+        "［背包］\n"
+        f"{storage_text(game.backpack)}\n\n"
+        "［保險箱］\n"
+        f"{storage_text(game.secure_box)}\n\n"
+        "［附近物品］\n"
+        f"{storage_text(game.nearby_items)}"
+    )
+
+    return discord.Embed(
+        title="局內背包",
+        description=desc,
+        color=0x2b2d31
+    )
+
+
+class DeltaBagView(discord.ui.View):
+    def __init__(self, game):
+        super().__init__(timeout=120)
+        self.game = game
+
+    @discord.ui.button(label="編輯背包", style=discord.ButtonStyle.primary)
+    async def edit_backpack(self, interaction, button):
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "backpack")
+        )
+
+    @discord.ui.button(label="編輯保險箱", style=discord.ButtonStyle.primary)
+    async def edit_secure(self, interaction, button):
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "secure")
+        )
+
+    @discord.ui.button(label="離開背包", style=discord.ButtonStyle.secondary)
+    async def leave_bag(self, interaction, button):
+        self.game.refresh_view_items()
+        await interaction.response.edit_message(
+            embed=self.game.build_embed(),
+            view=self.game
+        )
+
+
+class DeltaEditStorageView(discord.ui.View):
+    def __init__(self, game, mode):
+        super().__init__(timeout=120)
+        self.game = game
+        self.mode = mode
+
+        if mode == "backpack":
+            self.add_item(MoveFromSecureSelect(game))
+            self.add_item(MoveToSecureSelect(game))
+            self.add_item(DropFromBackpackSelect(game))
+            self.add_item(PickNearbyToBackpackSelect(game))
+        else:
+            self.add_item(MoveToSecureSelect(game))
+            self.add_item(MoveFromSecureSelect(game))
+            self.add_item(DropFromSecureSelect(game))
+            self.add_item(PickNearbyToSecureSelect(game))
+
+        self.add_item(BackToBagButton(game))
+
+
+class BackToBagButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="返回背包", style=discord.ButtonStyle.secondary)
+        self.game = game
+
+    async def callback(self, interaction):
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaBagView(self.game)
+        )
+
+
+def make_select_options(items, empty_label):
+    if not items:
+        return [discord.SelectOption(label=empty_label, value="none")]
+
+    opts = []
+    for idx, it in enumerate(items):
+        label = f"{it['name']}｜{it['cells']}格｜{it['value']:,}"
+        opts.append(discord.SelectOption(label=label[:100], value=str(idx)))
+    return opts[:25]
+
+
+class MoveFromSecureSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="從保險箱移入背包",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.secure_box, "保險箱是空的")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.secure_box[int(self.values[0])]
+
+        if not can_fit(self.game.backpack, BACKPACK_CAPACITY, item):
+            return await interaction.response.send_message("背包空間不足。", ephemeral=True)
+
+        self.game.backpack.append(item)
+        self.game.secure_box.remove(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "backpack")
+        )
+
+
+class MoveToSecureSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="移出至保險箱",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.backpack, "背包是空的")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.backpack[int(self.values[0])]
+
+        if not can_fit(self.game.secure_box, SECURE_CAPACITY, item):
+            return await interaction.response.send_message("保險箱空間不足。", ephemeral=True)
+
+        self.game.secure_box.append(item)
+        self.game.backpack.remove(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "secure")
+        )
+
+
+class DropFromBackpackSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="丟棄背包物品",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.backpack, "背包是空的")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.backpack.pop(int(self.values[0]))
+        self.game.nearby_items.append(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "backpack")
+        )
+
+
+class DropFromSecureSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="丟棄保險箱物品",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.secure_box, "保險箱是空的")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.secure_box.pop(int(self.values[0]))
+        self.game.nearby_items.append(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "secure")
+        )
+
+
+class PickNearbyToBackpackSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="撿起附近物品到背包",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.nearby_items, "附近沒有物品")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.nearby_items[int(self.values[0])]
+
+        if not can_fit(self.game.backpack, BACKPACK_CAPACITY, item):
+            return await interaction.response.send_message("背包空間不足。", ephemeral=True)
+
+        self.game.backpack.append(item)
+        self.game.nearby_items.remove(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "backpack")
+        )
+
+
+class PickNearbyToSecureSelect(discord.ui.Select):
+    def __init__(self, game):
+        self.game = game
+        super().__init__(
+            placeholder="撿起附近物品到保險箱",
+            min_values=1,
+            max_values=1,
+            options=make_select_options(game.nearby_items, "附近沒有物品")
+        )
+
+    async def callback(self, interaction):
+        if self.values[0] == "none":
+            return await interaction.response.send_message("沒有物品。", ephemeral=True)
+
+        item = self.game.nearby_items[int(self.values[0])]
+
+        if not can_fit(self.game.secure_box, SECURE_CAPACITY, item):
+            return await interaction.response.send_message("保險箱空間不足。", ephemeral=True)
+
+        self.game.secure_box.append(item)
+        self.game.nearby_items.remove(item)
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaEditStorageView(self.game, "secure")
+        )
+
+
+# =========================
+# SEARCH MENU
+# =========================
+
+class DeltaSearchMenuView(discord.ui.View):
+    def __init__(self, game):
+        super().__init__(timeout=180)
+        self.game = game
+
+    @discord.ui.button(label="到處找找", style=discord.ButtonStyle.primary)
+    async def look_around(self, interaction, button):
+        game = self.game
+        game.nearby_items.clear()
+
+        if game.ap < 1:
+            return await interaction.response.send_message("行動點不足。", ephemeral=True)
+
+        game.ap -= 1
+
+        key = place_key_of(game)
+
+        if key not in game.found_containers:
+            game.found_containers[key] = []
+
+        new_containers = random_containers_for_place()
+        for name in new_containers:
+            game.found_containers[key].append(generate_container(name))
+
+        embed = build_search_embed(game, f"你在附近找到了 {len(new_containers)} 個容器。")
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=DeltaFoundContainersView(game)
+        )
+
+    @discord.ui.button(label="尋找保險", style=discord.ButtonStyle.secondary)
+    async def find_safe(self, interaction, button):
+        game = self.game
+        key = place_key_of(game)
+        found = []
+
+        current_place = (game.location, game.sub_location)
+
+        if current_place in game.big_safes:
+            found.append("大保險")
+
+        if current_place in game.small_safes:
+            found.append("小保險")
+
+        if not found:
+            return await interaction.response.send_message("這裡沒有找到保險。", ephemeral=True)
+
+        if key not in game.found_containers:
+            game.found_containers[key] = []
+
+        existing_names = [c["name"] for c in game.found_containers[key]]
+
+        for name in found:
+            if name not in existing_names:
+                game.found_containers[key].append(generate_container(name))
+
+        await interaction.response.edit_message(
+            embed=build_search_embed(game, "你找到了保險。"),
+            view=DeltaFoundContainersView(game)
+        )
+
+    @discord.ui.button(label="尋找卡房", style=discord.ButtonStyle.secondary)
+    async def find_card_room(self, interaction, button):
+        await interaction.response.send_message("卡房系統尚未實裝。", ephemeral=True)
+
+    @discord.ui.button(label="原地標記", style=discord.ButtonStyle.secondary)
+    async def mark_spot(self, interaction, button):
+        game = self.game
+        key = place_key_of(game)
+
+        if key not in game.found_containers or not game.found_containers[key]:
+            return await interaction.response.send_message("你還沒有找到可以標記的搜索點。", ephemeral=True)
+
+        game.marked_spots[key] = list(game.found_containers[key])
+        await interaction.response.send_message("已標記目前搜索點。", ephemeral=True)
+
+    @discord.ui.button(label="前往標記", style=discord.ButtonStyle.secondary)
+    async def go_mark(self, interaction, button):
+        game = self.game
+        key = place_key_of(game)
+
+        if key not in game.marked_spots:
+            return await interaction.response.send_message("這個地方沒有標記點。", ephemeral=True)
+
+        game.found_containers[key] = list(game.marked_spots[key])
+
+        await interaction.response.edit_message(
+            embed=build_search_embed(game, "你回到了標記點。"),
+            view=DeltaFoundContainersView(game)
+        )
+
+    @discord.ui.button(label="暫停搜索", style=discord.ButtonStyle.danger)
+    async def stop_search(self, interaction, button):
+        game = self.game
+        game.refresh_view_items()
+        await interaction.response.edit_message(
+            embed=game.build_embed(),
+            view=game
+        )
+
+
+def build_search_embed(game, log="你正在搜索附近。"):
+    key = place_key_of(game)
+    containers = game.found_containers.get(key, [])
+
+    desc = (
+        f"位置：**{game.location_text()}**\n"
+        f"行動點：**{game.ap}**\n"
+        f"背包：**{used_cells(game.backpack)}/{BACKPACK_CAPACITY}**｜"
+        f"保險箱：**{used_cells(game.secure_box)}/{SECURE_CAPACITY}**\n\n"
+        f"{log}\n\n"
+        "［已發現容器］\n"
+    )
+
+    if containers:
+        desc += "\n".join(f"- {c['name']}" for c in containers)
+    else:
+        desc += "尚未發現容器。"
+
+    return discord.Embed(
+        title="原地搜索",
+        description=desc,
+        color=0x5865F2
+    )
+
+
+class DeltaFoundContainersView(discord.ui.View):
+    def __init__(self, game):
+        super().__init__(timeout=180)
+        self.game = game
+
+        key = place_key_of(game)
+        containers = game.found_containers.get(key, [])
+
+        for idx, container in enumerate(containers[:20]):
+            self.add_item(OpenContainerButton(game, idx, container["name"]))
+
+        self.add_item(BackToSearchMenuButton(game))
+
+
+class OpenContainerButton(discord.ui.Button):
+    def __init__(self, game, index, name):
+        super().__init__(label=name, style=discord.ButtonStyle.primary)
+        self.game = game
+        self.index = index
+
+    async def callback(self, interaction):
+        game = self.game
+        key = place_key_of(game)
+        container = game.found_containers[key][self.index]
+
+        if container["name"] == "大保險" and not container.get("hacked"):
+            view = DeltaBigSafeHackView(game, container)
+            await interaction.response.edit_message(
+                embed=view.build_embed(),
+                view=view
+            )
+            msg = await interaction.original_response()
+            view.message = msg
+            view.task = asyncio.create_task(view.start_loop())
+            return
+
+        view = DeltaContainerLootView(game, container)
+        await interaction.response.edit_message(
+            embed=view.build_embed(),
+            view=view
+        )
+        msg = await interaction.original_response()
+        view.message = msg
+        asyncio.create_task(view.reveal_loop())
+
+
+class BackToSearchMenuButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="繼續行動", style=discord.ButtonStyle.secondary)
+        self.game = game
+
+    async def callback(self, interaction):
+        await interaction.response.edit_message(
+            embed=build_search_embed(self.game),
+            view=DeltaSearchMenuView(self.game)
+        )
+
+
+# =========================
+# CONTAINER LOOT VIEW
+# =========================
+
+class DeltaContainerLootView(discord.ui.View):
+    def __init__(self, game, container):
+        super().__init__(timeout=180)
+        self.game = game
+        self.container = container
+        self.message = None
+        self.edit_lock = asyncio.Lock()
+        self.refresh_buttons()
+
+    def refresh_buttons(self):
+        self.clear_items()
+
+        for idx, item in enumerate(self.container["items"]):
+            if item.get("state") == "done":
+                self.add_item(TakeItemButton(self.game, self.container, idx))
+
+        self.add_item(OpenBagInContainerButton(self.game, self.container))
+        self.add_item(CloseContainerButton(self.game))
+
+    def build_embed(self):
+        desc = (
+            f"容器：**{self.container['name']}**\n"
+            f"背包：**{used_cells(self.game.backpack)}/{BACKPACK_CAPACITY}**｜"
+            f"保險箱：**{used_cells(self.game.secure_box)}/{SECURE_CAPACITY}**\n\n"
+            f"{render_container_grid(self.container)}"
+        )
+
+        return discord.Embed(
+            title="容器搜索",
+            description=desc,
+            color=0x2b2d31
+        )
+
+    async def safe_edit(self):
+        if not self.message:
+            return
+
+        async with self.edit_lock:
+            self.refresh_buttons()
+            try:
+                await self.message.edit(embed=self.build_embed(), view=self)
+            except:
+                pass
+
+    async def reveal_loop(self):
+        if self.container.get("searched"):
+            return
+
+        self.container["searched"] = True
+
+        for item in self.container["items"]:
+            if item.get("state") != "hidden":
+                continue
+
+            item["state"] = "searching"
+            await self.safe_edit()
+
+            await asyncio.sleep(QUALITY_SEARCH_TIMES.get(item["quality"], 1))
+
+            if item["name"] == "啥也沒有":
+                item["state"] = "taken"
+            else:
+                item["state"] = "done"
+
+            await self.safe_edit()
+
+
+class TakeItemButton(discord.ui.Button):
+    def __init__(self, game, container, index):
+        item = container["items"][index]
+        label = f"{item['name']} ({item['value']:,})"
+        super().__init__(label=label[:80], style=discord.ButtonStyle.success)
+        self.game = game
+        self.container = container
+        self.index = index
+
+    async def callback(self, interaction):
+        item = self.container["items"][self.index]
+
+        if item.get("state") != "done":
+            return await interaction.response.send_message("這個物品不能拿。", ephemeral=True)
+
+        if not can_fit(self.game.backpack, BACKPACK_CAPACITY, item):
+            return await interaction.response.send_message("背包空間不足。", ephemeral=True)
+
+        self.game.backpack.append(item)
+        item["state"] = "taken"
+
+        view = DeltaContainerLootView(self.game, self.container)
+        await interaction.response.edit_message(
+            embed=view.build_embed(),
+            view=view
+        )
+        view.message = await interaction.original_response()
+
+
+class OpenBagInContainerButton(discord.ui.Button):
+    def __init__(self, game, container):
+        super().__init__(label="查看背包", style=discord.ButtonStyle.secondary)
+        self.game = game
+        self.container = container
+
+    async def callback(self, interaction):
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaBagView(self.game)
+        )
+
+
+class CloseContainerButton(discord.ui.Button):
+    def __init__(self, game):
+        super().__init__(label="關閉容器", style=discord.ButtonStyle.danger)
+        self.game = game
+
+    async def callback(self, interaction):
+        await interaction.response.edit_message(
+            embed=build_search_embed(self.game, "容器已暫時關閉，剩下的物品會保留。"),
+            view=DeltaFoundContainersView(self.game)
+        )
+
+
+# =========================
+# BIG SAFE HACK
+# =========================
+
+HACK_SYMBOLS = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+
+class DeltaBigSafeHackView(discord.ui.View):
+    def __init__(self, game, container):
+        super().__init__(timeout=45)
+        self.game = game
+        self.container = container
+        self.player = game.player
+
+        self.code = [random.choice(HACK_SYMBOLS) for _ in range(5)]
+        self.rows = [
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+            [random.choice(HACK_SYMBOLS) for _ in range(5)],
+        ]
+        self.code_countdowns = [random.randint(1, 5) for _ in range(5)]
+
+        self.current_index = 0
+        self.locked = [False] * 5
+        self.failed = False
+        self.opened = False
+
+        self.message = None
+        self.task = None
+        self.edit_lock = asyncio.Lock()
+
+    def render_slot(self):
+        def fmt_row(row, middle=False):
+            cells = []
+            for i, ch in enumerate(row):
+                if middle and i == self.current_index and not self.opened:
+                    cells.append(f"[{ch}]")
+                else:
+                    cells.append(f" {ch} ")
+            return " ".join(cells)
+
+        code_line = " ".join(
+            f"✅{c}" if self.locked[i] else c
+            for i, c in enumerate(self.code)
+        )
+
+        return (
+            f"目標密碼：`{code_line}`\n"
+            f"目前進度：**{self.current_index + 1}/5**\n\n"
+            "```text\n"
+            f"{fmt_row(self.rows[0])}\n"
+            "----------------------\n"
+            f"{fmt_row(self.rows[1], middle=True)}\n"
+            "----------------------\n"
+            f"{fmt_row(self.rows[2])}\n"
+            "```\n"
+            "按下「停止」讓框框停在當前密碼。"
+        )
+
+    def build_embed(self):
+        return discord.Embed(
+            title="破譯錯誤" if self.failed else "大保險破譯",
+            description=self.render_slot(),
+            color=0xff3333 if self.failed else 0xffcc00
+        )
+
+    async def safe_edit(self):
+        if not self.message:
+            return
+
+        async with self.edit_lock:
+            try:
+                await self.message.edit(embed=self.build_embed(), view=self)
+            except:
+                if self.task:
+                    self.task.cancel()
+
+    async def start_loop(self):
+        try:
+            while not self.opened:
+                await asyncio.sleep(1.0)
+
+                if self.failed:
+                    continue
+
+                new_top = []
+                for col in range(5):
+                    if self.locked[col]:
+                        new_top.append(random.choice(HACK_SYMBOLS))
+                        continue
+
+                    self.code_countdowns[col] -= 1
+                    if self.code_countdowns[col] <= 0:
+                        new_top.append(self.code[col])
+                        self.code_countdowns[col] = random.randint(1, 5)
+                    else:
+                        new_top.append(random.choice(HACK_SYMBOLS))
+
+                old_top = self.rows[0][:]
+                old_mid = self.rows[1][:]
+
+                for col in range(5):
+                    if self.locked[col]:
+                        self.rows[1][col] = self.code[col]
+                    else:
+                        self.rows[0][col] = new_top[col]
+                        self.rows[1][col] = old_top[col]
+                        self.rows[2][col] = old_mid[col]
+
+                await self.safe_edit()
+
+        except asyncio.CancelledError:
+            pass
+
+    @discord.ui.button(label="停止", style=discord.ButtonStyle.danger)
+    async def stop_button(self, interaction, button):
+        if interaction.user.id != self.player.id:
+            return await interaction.response.send_message("這不是你的保險箱。", ephemeral=True)
+
+        await interaction.response.defer()
+
+        current = self.rows[1][self.current_index]
+        target = self.code[self.current_index]
+
+        if current == target:
+            self.locked[self.current_index] = True
+            self.rows[1][self.current_index] = target
+            self.current_index += 1
+
+            if self.current_index >= 5:
+                self.opened = True
+                self.container["hacked"] = True
+
+                if self.task:
+                    self.task.cancel()
+
+                view = DeltaContainerLootView(self.game, self.container)
+                await interaction.message.edit(
+                    embed=view.build_embed(),
+                    view=view
+                )
+                view.message = interaction.message
+                asyncio.create_task(view.reveal_loop())
+                return
+
+            return await self.safe_edit()
+
+        self.failed = True
+        await self.safe_edit()
+
+        await asyncio.sleep(2)
+
+        self.failed = False
+        await self.safe_edit()
+
+    async def on_timeout(self):
+        if self.task:
+            self.task.cancel()
+        self.clear_items()
+        await self.safe_edit()
 
 @tree.command(name="deltaforce", description="Delta Force simulator test")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
