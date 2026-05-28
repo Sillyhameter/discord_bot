@@ -1596,7 +1596,7 @@ class DeltaForceView(discord.ui.View):
         self.add_item(DeltaSearchButton(self))
         self.add_item(DeltaCarefulButton(self))
         self.add_item(DeltaExtractButton(self))
-        self.add_item(DeltaBagButton(self)
+        self.add_item(DeltaBagButton(self))
 
     def build_embed(self):
         if not self.started:
