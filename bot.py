@@ -2805,6 +2805,11 @@ class CrashView(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
+        user_data.setdefault(self.uid, {})
+        user_data[self.uid].setdefault("coins", 0)
+        user_data[self.uid].setdefault("stats", {})
+        user_data[self.uid]["stats"].setdefault("money_won", 0)
+
         user_data[self.uid]["coins"] += winnings
         user_data[self.uid]["stats"]["money_won"] += winnings
         record_game(self.uid, True)
