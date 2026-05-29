@@ -1505,6 +1505,13 @@ class DeltaForceView(discord.ui.View):
     def __init__(self, player):
         super().__init__(timeout=180)
 
+        self.active_panel = "main"
+        self.active_hack_id = None
+
+        self.current_found_containers = []
+        self.search_records = {}
+        self.search_attempts = {}
+
         self.backpack = []
         self.secure_box = []
         self.nearby_items = []
@@ -1755,6 +1762,9 @@ class DeltaSearchButton(discord.ui.Button):
                 "這不是你的行動。",
                 ephemeral=True
             )
+
+        game.active_panel = "search"
+        game.active_hack_id = None
 
         await interaction.response.edit_message(
             embed=build_search_embed(game),
@@ -2346,8 +2356,14 @@ def random_containers_for_place():
         "電腦機箱",
         "服務器",
     ]
-    count = random.randint(1, 3)
-    return random.sample(pool, count)
+
+    count = weighted_choice([
+        (1, 30),
+        (2, 50),
+        (3, 20),
+    ])
+
+    return [generate_container(random.choice(pool)) for _ in range(count)]
 
 
 # =========================
@@ -2634,25 +2650,34 @@ class DeltaSearchMenuView(discord.ui.View):
     async def look_around(self, interaction, button):
         game = self.game
         game.nearby_items.clear()
-
-        if game.ap < 1:
-            return await interaction.response.send_message("行動點不足。", ephemeral=True)
-
-        game.ap -= 1
-
+    
+        if game.ap < 0.5:
+            return await interaction.response.send_message(
+                "行動點不足。",
+                ephemeral=True
+            )
+    
+        game.ap -= 0.5
+    
         key = place_key_of(game)
-
-        if key not in game.found_containers:
-            game.found_containers[key] = []
-
-        new_containers = random_containers_for_place()
-        for name in new_containers:
-            game.found_containers[key].append(generate_container(name))
-
-        embed = build_search_embed(game, f"你在附近找到了 {len(new_containers)} 個容器。")
-
+    
+        game.search_attempts[key] = game.search_attempts.get(key, 0) + 1
+        attempts = game.search_attempts[key]
+    
+        records = game.search_records.setdefault(key, [])
+    
+        reuse_chance = min(100, max(0, (attempts - 1) * 20))
+    
+        if records and random.randint(1, 100) <= reuse_chance:
+            game.current_found_containers = random.choice(records)
+            log = f"你重新找到了之前的搜索點。重遇率：{reuse_chance}%"
+        else:
+            game.current_found_containers = random_containers_for_place()
+            records.append(game.current_found_containers)
+            log = f"你找到了新的搜索點，共 {len(game.current_found_containers)} 個容器。"
+    
         await interaction.response.edit_message(
-            embed=embed,
+            embed=build_search_embed(game, log),
             view=DeltaFoundContainersView(game)
         )
 
@@ -2728,8 +2753,7 @@ class DeltaSearchMenuView(discord.ui.View):
 
 
 def build_search_embed(game, log="你正在搜索附近。"):
-    key = place_key_of(game)
-    containers = game.found_containers.get(key, [])
+    containers = game.current_found_containers
 
     desc = (
         f"位置：**{game.location_text()}**\n"
@@ -2741,7 +2765,10 @@ def build_search_embed(game, log="你正在搜索附近。"):
     )
 
     if containers:
-        desc += "\n".join(f"- {c['name']}" for c in containers)
+        desc += "\n".join(
+            f"- {'（已搜索）' if c.get('searched') or c.get('opened') else ''}{c['name']}"
+            for c in containers
+        )
     else:
         desc += "尚未發現容器。"
 
@@ -2757,13 +2784,34 @@ class DeltaFoundContainersView(discord.ui.View):
         super().__init__(timeout=180)
         self.game = game
 
-        key = place_key_of(game)
-        containers = game.found_containers.get(key, [])
+        containers = game.current_found_containers
 
         for idx, container in enumerate(containers[:20]):
-            self.add_item(OpenContainerButton(game, idx, container["name"]))
+            label = f"（已搜索）{container['name']}" if container.get("searched") or container.get("opened") else container["name"]
+            self.add_item(OpenContainerButton(game, idx, label))
+
+        self.add_item(
+            EditBagFromSearchButton(game)
+        )
 
         self.add_item(BackToSearchMenuButton(game))
+
+class EditBagFromSearchButton(discord.ui.Button):
+
+    def __init__(self, game):
+        super().__init__(
+            label="編輯背包",
+            style=discord.ButtonStyle.secondary
+        )
+
+        self.game = game
+
+    async def callback(self, interaction):
+
+        await interaction.response.edit_message(
+            embed=build_bag_embed(self.game),
+            view=DeltaBagView(self.game)
+        )
 
 
 class OpenContainerButton(discord.ui.Button):
@@ -2774,8 +2822,7 @@ class OpenContainerButton(discord.ui.Button):
 
     async def callback(self, interaction):
         game = self.game
-        key = place_key_of(game)
-        container = game.found_containers[key][self.index]
+        container = game.current_found_containers[self.index]
 
         if container["name"] == "大保險" and not container.get("hacked"):
             view = DeltaBigSafeHackView(game, container)
@@ -2868,6 +2915,12 @@ class DeltaContainerLootView(discord.ui.View):
             if item.get("state") != "hidden":
                 continue
 
+            if self.game.ap < 0.1:
+                await self.safe_edit()
+                return
+            
+            self.game.ap -= 0.1
+
             item["state"] = "searching"
             await self.safe_edit()
 
@@ -2893,10 +2946,18 @@ class TakeItemButton(discord.ui.Button):
         if item.get("state") != "done":
             return await interaction.response.send_message("這個物品不能拿。", ephemeral=True)
 
-        if not can_fit(self.game.backpack, BACKPACK_CAPACITY, item):
-            return await interaction.response.send_message("背包空間不足。", ephemeral=True)
-
-        self.game.backpack.append(item)
+        if can_fit(self.game.secure_box, SECURE_CAPACITY, item):
+            self.game.secure_box.append(item)
+        
+        elif can_fit(self.game.backpack, BACKPACK_CAPACITY, item):
+            self.game.backpack.append(item)
+        
+        else:
+            return await interaction.response.send_message(
+                "背包與保險箱空間都不足。",
+                ephemeral=True
+            )
+        
         item["state"] = "taken"
 
         view = DeltaContainerLootView(self.game, self.container)
@@ -2943,25 +3004,45 @@ class DeltaBigSafeHackView(discord.ui.View):
     def __init__(self, game, container):
         super().__init__(timeout=45)
         self.game = game
+
         self.container = container
+
         self.player = game.player
 
+        self.hack_id = random.random()
+
+        self.game.active_panel = "big_safe_hack"
+
+        self.game.active_hack_id = self.hack_id
+
         self.code = [random.choice(HACK_SYMBOLS) for _ in range(5)]
+
         self.rows = [
+
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
+
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
+
             [random.choice(HACK_SYMBOLS) for _ in range(5)],
+
         ]
+
         self.code_countdowns = [random.randint(1, 5) for _ in range(5)]
 
         self.current_index = 0
+
         self.locked = [False] * 5
+
         self.failed = False
+
         self.opened = False
+
         self.finishing = False
 
         self.message = None
+
         self.task = None
+
         self.edit_lock = asyncio.Lock()
 
     def render_slot(self):
@@ -3001,6 +3082,16 @@ class DeltaBigSafeHackView(discord.ui.View):
 
     async def safe_edit(self):
         if not self.message:
+            return
+    
+        if self.game.active_panel != "big_safe_hack":
+            if self.task:
+                self.task.cancel()
+            return
+    
+        if self.game.active_hack_id != self.hack_id:
+            if self.task:
+                self.task.cancel()
             return
 
         async with self.edit_lock:
@@ -3063,6 +3154,9 @@ class DeltaBigSafeHackView(discord.ui.View):
         if self.finishing or self.opened or self.current_index >= 5:
             return await interaction.response.defer()
 
+        if self.current_index >= len(self.rows[1]):
+            return await self.reveal_loot_loop()
+        
         current = self.rows[1][self.current_index]
         target = self.code[self.current_index]
 
