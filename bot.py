@@ -2687,29 +2687,28 @@ class DeltaSearchMenuView(discord.ui.View):
     @discord.ui.button(label="尋找保險", style=discord.ButtonStyle.secondary)
     async def find_safe(self, interaction, button):
         game = self.game
-        key = place_key_of(game)
+    
+        current_place = (
+            game.location,
+            game.sub_location if game.sub_location else None
+        )
+    
         found = []
-
-        current_place = (game.location, game.sub_location)
-
+    
         if current_place in game.big_safes:
-            found.append("大保險")
-
+            found.append(generate_container("大保險"))
+    
         if current_place in game.small_safes:
-            found.append("小保險")
-
+            found.append(generate_container("小保險"))
+    
         if not found:
-            return await interaction.response.send_message("這裡沒有找到保險。", ephemeral=True)
-
-        if key not in game.found_containers:
-            game.found_containers[key] = []
-
-        existing_names = [c["name"] for c in game.found_containers[key]]
-
-        for name in found:
-            if name not in existing_names:
-                game.found_containers[key].append(generate_container(name))
-
+            return await interaction.response.send_message(
+                f"這裡沒有找到保險。\n目前位置：{current_place}",
+                ephemeral=True
+            )
+    
+        game.current_found_containers = found
+    
         await interaction.response.edit_message(
             embed=build_search_embed(game, "你找到了保險。"),
             view=DeltaFoundContainersView(game)
