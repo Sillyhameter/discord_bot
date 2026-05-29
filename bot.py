@@ -1614,7 +1614,7 @@ class DeltaForceView(discord.ui.View):
                 f"出生點：**{self.location_text()}**\n"
                 f"模式：**普通**\n"
                 f"戰備：**標準**\n"
-                f"行動點：**{self.ap}**\n"
+                f"行動點：**{fmt_ap(self.ap)}**\n"
                 f"撤離方向：**{self.extract}**\n\n"
                 "［大保險］\n"
                 + "\n".join(f"- {place_name(x)}" for x in self.big_safes) +
@@ -1634,7 +1634,7 @@ class DeltaForceView(discord.ui.View):
 
         desc = (
             f"玩家：{self.player.mention}\n"
-            f"當前行動點：**{self.ap}**\n"
+            f"當前行動點：**{fmt_ap(self.ap)}**\n"
             f"當前位置：**{self.location_text()}**\n"
             f"距離撤離點：**{dist}**\n"
             f"目前戰利品：**{self.loot}**\n\n"
