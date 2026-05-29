@@ -1381,6 +1381,9 @@ async def bigsafe_test(
         view.start_loop()
     )
 
+def fmt_ap(ap):
+    return f"{ap:.1f}".rstrip("0").rstrip(".")
+
 DELTA_LOCATIONS = {
     "遊客中心": ["阿薩拉營地", "行政樓"],
     "阿薩拉營地": ["變電站", "遊客中心"],
@@ -1820,7 +1823,7 @@ class DeltaExtractButton(discord.ui.Button):
             title="成功撤離",
             description=(
                 f"玩家：{game.player.mention}\n"
-                f"剩餘行動點：**{game.ap}**\n"
+                f"剩餘行動點：**{fmt_ap(game.ap)}**\n"
                 f"帶出戰利品價值：**{game.loot}**\n"
                 "測試版不寫入存檔。"
             ),
@@ -2661,17 +2664,17 @@ class DeltaSearchMenuView(discord.ui.View):
     
         key = place_key_of(game)
     
-        game.search_attempts[key] = game.search_attempts.get(key, 0) + 1
-        attempts = game.search_attempts[key]
-    
         records = game.search_records.setdefault(key, [])
-    
-        reuse_chance = min(100, max(0, (attempts - 1) * 20))
-    
+        attempts = game.search_attempts.get(key, 0)
+        
+        reuse_chance = min(100, attempts * 20)
+        
         if records and random.randint(1, 100) <= reuse_chance:
             game.current_found_containers = random.choice(records)
-            log = f"你重新找到了之前的搜索點。重遇率：{reuse_chance}%"
+            log = "你重新找到了之前的搜索點。"
+        
         else:
+            game.search_attempts[key] = attempts + 1
             game.current_found_containers = random_containers_for_place()
             records.append(game.current_found_containers)
             log = f"你找到了新的搜索點，共 {len(game.current_found_containers)} 個容器。"
@@ -2757,7 +2760,7 @@ def build_search_embed(game, log="你正在搜索附近。"):
 
     desc = (
         f"位置：**{game.location_text()}**\n"
-        f"行動點：**{game.ap}**\n"
+        f"行動點：**{fmt_ap(game.ap)}**\n"
         f"背包：**{used_cells(game.backpack)}/{BACKPACK_CAPACITY}**｜"
         f"保險箱：**{used_cells(game.secure_box)}/{SECURE_CAPACITY}**\n\n"
         f"{log}\n\n"
