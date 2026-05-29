@@ -7285,7 +7285,7 @@ async def private_messages_command(
     )
 
     await interaction.response.send_message(
-        f"📢 Ready｜Mention: {role.mention if role else '@everyone'}",
+        f"# Click me pls :D\n({role.mention if role else '@everyone'})",
         view=view,
         ephemeral=True
     )
