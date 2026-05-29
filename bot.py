@@ -5130,7 +5130,7 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
             """# @everyone
 # thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))
 # con má mày tới tháng là lại phun nước máu lồn cho thk cha dượng mày uống
-# Nghèo bần hèn bị cha mày đứng trên đạp đầu lũ đú chúng mày cha đi lên
+# Nghèo bần hèn bị cha mày đứng trên đạp đầu lũ đú chúng mày cha đi lên=))
 # Cha mày hóa thân thành hắc bạch vô thường cha mày bắt hồn đĩ mẹ mày xuống chầu diêm vương
 # Sống như 1 con chó ngu dốt như lũ phèn ói chợ búa cầm dao múa kiếm
 # thằng ảo war bị tao chửi cố gắng phản kháng nhưng nút home k cho phép mày cay quá đập cmn máy 🤣👈
@@ -5150,7 +5150,6 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
 # anh dập nát 2 túi tinh trùng của mày như máy dập rõ mà 👌
 # thk ngu bán dâm cho mấy con lồn già vú nhăn đi lấy tiền vô net chat với cha m hả=))
 # cali ăn cứt cay cha m à=))
-# thằng tộc châu phi bị đá nát sọ nằm bất động dưới bãi cứt =))
 https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""]
         
         try:
