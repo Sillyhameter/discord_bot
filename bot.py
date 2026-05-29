@@ -3219,10 +3219,10 @@ class DeltaBigSafeHackView(discord.ui.View):
             self.task.cancel()
 
         self.clear_items()
-            if self.is_active():
-                self.game.active_panel = "search"
-                self.game.active_hack_id = None
-            return
+        if self.is_active():
+            self.game.active_panel = "search"
+            self.game.active_hack_id = None
+        return
 
 @tree.command(name="deltaforce", description="Delta Force simulator test")
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
