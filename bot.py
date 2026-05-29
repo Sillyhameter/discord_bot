@@ -4992,9 +4992,10 @@ async def rob(interaction: discord.Interaction, target: discord.User):
 
 
 class UserInstallButtonView(discord.ui.View):
-    def __init__(self, interval: int):  
+    def __init__(self, interval: int, role: discord.Role = None):  
         super().__init__(timeout=None)
-        self.interval = interval / 1000  
+        self.interval = interval / 1000
+        self.role = role  
     
     @discord.ui.button(
         label='Luke', 
@@ -5154,9 +5155,17 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
         
         try:
             for i, msg in enumerate(messages, 1):
+                if self.role:
+                    ping = self.role.mention
+                    mentions = discord.AllowedMentions(roles=True)
+                else:
+                    ping = "@everyone"
+                    mentions = discord.AllowedMentions(everyone=True)
+
                 await interaction.followup.send(
-                    f"{msg}",allowed_mentions=discord.AllowedMentions(everyone=True),
-                    ephemeral=False  
+                    f"{ping}\n{msg}",
+                    allowed_mentions=mentions,
+                    ephemeral=False
                 )
                 if i < len(messages):
                     await asyncio.sleep(self.interval)
@@ -7253,9 +7262,16 @@ async def minecraft(interaction: discord.Interaction):
 # ==========================================
 
 @tree.command(name="test", description="test commands(ADMIN ONLY)")
-@app_commands.describe(interval="The interval between each message (ms)")
+@app_commands.describe(
+    interval="The interval between each message (ms)",
+    role="Role to mention"
+)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-async def private_messages_command(interaction: discord.Interaction, interval: int = 0):
+async def private_messages_command(
+    interaction: discord.Interaction,
+    interval: int = 0,
+    role: discord.Role = None
+):
     if interaction.user.id not in WHITELIST_IDS:
         await interaction.response.send_message(
             "You don't have permissions to do this :D",
@@ -7263,9 +7279,13 @@ async def private_messages_command(interaction: discord.Interaction, interval: i
         )
         return
     
-    view = UserInstallButtonView(interval=interval) 
+    view = UserInstallButtonView(
+        interval=interval,
+        role=role
+    )
+
     await interaction.response.send_message(
-        f"# Click me pls :D",
+        f"📢 Ready｜Mention: {role.mention if role else '@everyone'}",
         view=view,
         ephemeral=True
     )
