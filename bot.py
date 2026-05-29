@@ -3108,6 +3108,12 @@ class DeltaBigSafeHackView(discord.ui.View):
         try:
             while not self.opened and not self.finishing:
                 await asyncio.sleep(1.0)
+            
+                if self.game.active_panel != "big_safe_hack":
+                    break
+            
+                if self.game.active_hack_id != self.hack_id:
+                    break
 
                 if self.failed:
                     continue
