@@ -5076,70 +5076,18 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
 # https://missav.li
 https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
             """# @everyone
-
-♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
-  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
-----------------------------------------------
-★　*　　　　　°　　　　🛰️　°·　　                            🪐
-
-.　　　•　°★　•  ☄
-
-▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
-
-
-𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
-
-♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
-  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
-----------------------------------------------
-★　*　　　　　°　　　　🛰️　°·　　                            🪐
-
-.　　　•　°★　•  ☄
-
-▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
-
-
-𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
-
-♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
-  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
-----------------------------------------------
-★　*　　　　　°　　　　🛰️　°·　　                            🪐
-
-.　　　•　°★　•  ☄
-
-▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
-
-
-𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
-
-♡₊˚ 🦢・₊✧ ⋆˚🐾˖° 💢 🎀『 𝙃𝙤𝙩𝙩𝙧𝙚𝙤 𝙃𝙣𝙝𝙪𝙩 🪽 𝙖𝙣𝙝 𝙢𝙖̃𝙞 𝙩𝙧𝙪̛𝙤̛̀𝙣𝙜 𝙩𝙤̂̀𝙣 𝙩𝙝𝙚𝙤 𝙣𝙖̆𝙢 𝙩𝙝𝙖́𝙣𝙜 ℹ️ 𝙘𝙝𝙖 đ𝙚̉ 𝙘𝙪̉𝙖 𝙡𝙪̃ đ𝙪́ 𝙢𝙭𝙝 』🧸🌠⚡💫💤🍼
-  ʕ•̫͡•ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʕ•̫͡•ʔ•̫͡•  🇻🇳
-----------------------------------------------
-★　*　　　　　°　　　　🛰️　°·　　                            🪐
-
-.　　　•　°★　•  ☄
-
-▁▂▃▄▅▆▇▇▆▅▄▃▂▁ ꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꕥؖؖؖꕹؖؖؖꕹؖؖؖꗝꗝؖؖؖꕹؖؖؖꕥꕥؖؖؖꕹؖؖꕹꕥꕹꕹꗝꕥꕹꕹꗝꗝꕹꕥꕥ
-
-
-𝗙𝗿𝗼𝗺 : 𝑯𝒏𝒉𝒖𝒕
-
-   🔱Admin: https://www.facebook.com/nhoanqnhutdev
-   https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
-            """# @everyone
 當我一個人在家時：
 https://cdn.discordapp.com/attachments/1097165733030547510/1488888625356607569/202603250730.mov?ex=69ce6b16&is=69cd1996&hm=5647c81b51b0acb4077bd10ea844cf15c4f844535253834b51d41596df3a3bf9&
 https://cdn.discordapp.com/attachments/1097165735253508245/1487810703489241320/X_SCHOOL_FOR_SLUTTY_SISSIEShttpst_coUbys4Qhyy3_X.mp4?ex=69cd2231&is=69cbd0b1&hm=cd3e1dcd0b52af2def5a2e75a477e6def1dec4681711c92ccb343e981b7bab5d&
-https://pbs.twimg.com/media/HC4klHNXgAAcEf8.jpg?name=orig
 https://cdn.discordapp.com/attachments/1097165733030547510/1480253619277398128/RDT_20260309_0118284670908632176542404.jpg?ex=69af011c&is=69adaf9c&hm=35d5fbc28d700699f5d9fd0a85b26808014c7a2c4d2ae95be56bd9981f758cea&
 https://cdn.discordapp.com/attachments/837743049441673266/1464957079105175584/Let-me-explain-1769017671277.mp4?ex=69775b19&is=69760999&hm=e7d20024c41312925f66fc0b8d29bc69b13b0f1db6693e3bd8ba5c8eb8d56289&
-https://pbs.twimg.com/media/G8C2MTYaAAAPG_R.png?name=orig
-https://cdn.discordapp.com/attachments/830682408327708682/1443648925708976129/g0nPhU8UBn3S3EjX.mp4?ex=692e7395&is=692d2215&hm=c274c95b1301cf805d9d7987093b84d0caba82b7cbab6104676df6f2579de320&
+https://cdn.discordapp.com/attachments/830682408327708682/1443648925708976129/g0nPhU8UBn3S3EjX.mp4?ex=692e7395&is=692d2215&hm=c274c95b1301cf805d9d7987093b84d0caba82b7cbab6104676df6f2579de320&""",
+            """# @everyone
 https://cdn.discordapp.com/attachments/1399008496799711323/1510175579608055868/3221895.png?ex=6a1e7f1b&is=6a1d2d9b&hm=a67b521a745c862613a8efc6937f86f69423978ca33025a3347014e201f88536&
 https://cdn.discordapp.com/attachments/1399008496799711323/1510175608892817508/zjqozxl9ywfd1.png?ex=6a1e7f22&is=6a1d2da2&hm=5ed58b6f5229c8a902119cd1542344b00bc076f213819507b9c1444602060406&
 https://cdn.discordapp.com/attachments/1399008496799711323/1510175648789037187/cq2b4n6ha2z91.png?ex=6a1e7f2c&is=6a1d2dac&hm=6b50aaab6fd578597e37470a312f8d915b6e245e90b7abb37693e63023d58f30&
-https://cdn.discordapp.com/attachments/1399008496799711323/1510175727511928933/3869036944.png?ex=6a1e7f3f&is=6a1d2dbf&hm=bdf962bb6a6aea1af0f436c6a8b8a450afef28a756c1b2e5165f899f6329ac3c&"""]
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175727511928933/3869036944.png?ex=6a1e7f3f&is=6a1d2dbf&hm=bdf962bb6a6aea1af0f436c6a8b8a450afef28a756c1b2e5165f899f6329ac3c&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175818108637354/images.png?ex=6a1e7f54&is=6a1d2dd4&hm=0f6a039d29b809751e6c30df4d53a21c602ba50c344da1421bbed4139b42bba8"""]
         
         try:
             for i, msg in enumerate(messages, 1):
