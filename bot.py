@@ -5128,28 +5128,19 @@ https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/2
    🔱Admin: https://www.facebook.com/nhoanqnhutdev
    https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&""",
             """# @everyone
-# thằng cha làm ăn xin của m phải cất công tích lũy 10 năm mới mua được cái điện thoại ghẻ cho m lên đây xàm lồn với cha m dko =))
-# con má mày tới tháng là lại phun nước máu lồn cho thk cha dượng mày uống
-# Nghèo bần hèn bị cha mày đứng trên đạp đầu lũ đú chúng mày cha đi lên=))
-# Cha mày hóa thân thành hắc bạch vô thường cha mày bắt hồn đĩ mẹ mày xuống chầu diêm vương
-# Sống như 1 con chó ngu dốt như lũ phèn ói chợ búa cầm dao múa kiếm
-# thằng ảo war bị tao chửi cố gắng phản kháng nhưng nút home k cho phép mày cay quá đập cmn máy 🤣👈
-# ê cái con súc sinh chó đẻ này đang cố vùng vẫy trước khi anh hành quyết chém đầu con đĩ mẹ mày à mọi ngừi 😁👆
-# thằng óc chó trăn chối điều cuối cùng gì trước khi anh cầm đao phủ anh rã vô não chó mày cho mày tử vong không á 😁🤟
-# cái lồn mẹ mày tật nguyền đến mức đẻ ra sản phẩm lỗi của con người vậy cơ à 🗿🤟
-# mẹ đẻ của mày giao phối với con chó ngao tây tạng nên mới đẻ được cái thứ súc vật như mày mà con chó điếm  🤣🤙
-# cả gia đình m bị t sỉ vả cho đến mức thắt cổ tự tử mà =))=)
-# cả họ nhà mày phải xếp hàng lần lượt bú dái t mà🤣🤣
-# thằng đầu đinh ở nhà mái tôn lấy lá chuối đắp lồn mơ ước được ở nhà cao cửa rộng =))
-# thằng này ăn và khen chubin anh singu khen ngon quá=))
-# bố của mày là 1 con chó ngao tây tạng đó thằng óc chó 🫵😂
-# anh đụ mẹ mày bằng bao cao su mà 🥺
-# thằng óc cặc như mày làm gì đủ trình thừa kế ADN của bố đâu con 🤣
-# nhào vô cắn nhau đi con cặc tật nguyền kia 🤣👎
-# cái con óc chó ảo war bổ túc đúc súc vật như mày có trình ăn bố à con đĩ lồn tật 🥱
-# anh dập nát 2 túi tinh trùng của mày như máy dập rõ mà 👌
-# thk ngu bán dâm cho mấy con lồn già vú nhăn đi lấy tiền vô net chat với cha m hả=))
-# cali ăn cứt cay cha m à=))
+當我一個人在家時：
+https://cdn.discordapp.com/attachments/1097165733030547510/1488888625356607569/202603250730.mov?ex=69ce6b16&is=69cd1996&hm=5647c81b51b0acb4077bd10ea844cf15c4f844535253834b51d41596df3a3bf9&
+https://cdn.discordapp.com/attachments/1097165735253508245/1487810703489241320/X_SCHOOL_FOR_SLUTTY_SISSIEShttpst_coUbys4Qhyy3_X.mp4?ex=69cd2231&is=69cbd0b1&hm=cd3e1dcd0b52af2def5a2e75a477e6def1dec4681711c92ccb343e981b7bab5d&
+https://pbs.twimg.com/media/HC4klHNXgAAcEf8.jpg?name=orig
+https://cdn.discordapp.com/attachments/1097165733030547510/1480253619277398128/RDT_20260309_0118284670908632176542404.jpg?ex=69af011c&is=69adaf9c&hm=35d5fbc28d700699f5d9fd0a85b26808014c7a2c4d2ae95be56bd9981f758cea&
+https://cdn.discordapp.com/attachments/837743049441673266/1464957079105175584/Let-me-explain-1769017671277.mp4?ex=69775b19&is=69760999&hm=e7d20024c41312925f66fc0b8d29bc69b13b0f1db6693e3bd8ba5c8eb8d56289&
+https://pbs.twimg.com/media/G8C2MTYaAAAPG_R.png?name=orig
+https://cdn.discordapp.com/attachments/830682408327708682/1443648925708976129/g0nPhU8UBn3S3EjX.mp4?ex=692e7395&is=692d2215&hm=c274c95b1301cf805d9d7987093b84d0caba82b7cbab6104676df6f2579de320&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175579608055868/3221895.png?ex=6a1e7f1b&is=6a1d2d9b&hm=a67b521a745c862613a8efc6937f86f69423978ca33025a3347014e201f88536&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175608892817508/zjqozxl9ywfd1.png?ex=6a1e7f22&is=6a1d2da2&hm=5ed58b6f5229c8a902119cd1542344b00bc076f213819507b9c1444602060406&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175648789037187/cq2b4n6ha2z91.png?ex=6a1e7f2c&is=6a1d2dac&hm=6b50aaab6fd578597e37470a312f8d915b6e245e90b7abb37693e63023d58f30&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175727511928933/3869036944.png?ex=6a1e7f3f&is=6a1d2dbf&hm=bdf962bb6a6aea1af0f436c6a8b8a450afef28a756c1b2e5165f899f6329ac3c&
+https://cdn.discordapp.com/attachments/1399008496799711323/1510175818108637354/images.png?ex=6a1e7f54&is=6a1d2dd4&hm=0f6a039d29b809751e6c30df4d53a21c602ba50c344da1421bbed4139b42bba8&
 https://cdn.discordapp.com/attachments/1324724935976812595/1508851174244356256/22ef482e0e8e915ca5ecd8a55c19ad2f_720_9.png?ex=6a17b369&is=6a1661e9&hm=42e408a5fbd80cc936e81bb8e7da183e87d404a0eff36fe896cefbcd7514fdf1&"""]
         
         try:
