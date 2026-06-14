@@ -638,6 +638,41 @@ async def on_ready():
     except Exception as e:
         print(f"Sync failed: {e}")
 
+@tree.command(name="banner", description="View a user's banner")
+@app_commands.allowed_contexts(
+    guilds=True,
+    dms=True,
+    private_channels=True
+)
+async def banner(
+    interaction: discord.Interaction,
+    user: discord.User = None
+):
+    target = user or interaction.user
+
+    target = await interaction.client.fetch_user(target.id)
+
+    embed = discord.Embed(
+        title=f"{target.name}'s Profile",
+        color=0x5865F2
+    )
+
+    embed.set_thumbnail(url=target.display_avatar.url)
+
+    if target.banner:
+        embed.set_image(url=target.banner.url)
+        embed.add_field(
+            name="Banner",
+            value="[View Banner]({})".format(target.banner.url),
+            inline=False
+        )
+    else:
+        embed.description = "This user has no banner."
+
+    await interaction.response.send_message(
+        embed=embed
+    )
+
 # =========================
 # DELTA FORCE TEST VERSION
 # 無存檔測試版
