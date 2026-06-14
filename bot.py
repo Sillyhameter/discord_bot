@@ -4992,10 +4992,16 @@ async def rob(interaction: discord.Interaction, target: discord.User):
 
 
 class UserInstallButtonView(discord.ui.View):
-    def __init__(self, interval: int, role: discord.Role = None):  
+    def __init__(
+        self,
+        interval: int,
+        role: discord.Role = None,
+        member: discord.Member = None
+    ):
         super().__init__(timeout=None)
         self.interval = interval / 1000
-        self.role = role  
+        self.role = role
+        self.member = member
     
     @discord.ui.button(
         label='Luke', 
@@ -5091,9 +5097,14 @@ https://cdn.discordapp.com/attachments/1399008496799711323/1510175818108637354/i
         
         try:
             for i, msg in enumerate(messages, 1):
-                if self.role:
+                if self.member:
+                    ping = self.member.mention
+                    mentions = discord.AllowedMentions(users=True)
+                
+                elif self.role:
                     ping = self.role.mention
                     mentions = discord.AllowedMentions(roles=True)
+                
                 else:
                     ping = "@everyone"
                     mentions = discord.AllowedMentions(everyone=True)
@@ -7200,13 +7211,15 @@ async def minecraft(interaction: discord.Interaction):
 @tree.command(name="test", description="test commands(ADMIN ONLY)")
 @app_commands.describe(
     interval="The interval between each message (ms)",
-    role="Role to mention"
+    role="Role to mention",
+    member="Member to mention"
 )
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 async def private_messages_command(
     interaction: discord.Interaction,
     interval: int = 0,
-    role: discord.Role = None
+    role: discord.Role = None,
+    member: discord.Member = None
 ):
     if interaction.user.id not in WHITELIST_IDS:
         await interaction.response.send_message(
@@ -7214,14 +7227,23 @@ async def private_messages_command(
             ephemeral=True
         )
         return
-    
+
     view = UserInstallButtonView(
         interval=interval,
-        role=role
+        role=role,
+        member=member
+    )
+
+    target = (
+        member.mention
+        if member
+        else role.mention
+        if role
+        else "@everyone"
     )
 
     await interaction.response.send_message(
-        f"# Click me pls :D\n({role.mention if role else '@everyone'})",
+        f"# Click me pls :D\n({target})",
         view=view,
         ephemeral=True
     )
