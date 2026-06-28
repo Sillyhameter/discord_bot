@@ -1,22 +1,23 @@
 // ==UserScript==
-// @name         Auto Smelt (Standalone Fix)
+// @name         Auto Smelt Debug
 // @namespace    http://tampermonkey.net/
-// @version      3.0
-// @description  Auto smelt ores when >=10, no UI freeze, independent config
+// @version      4.0
+// @description  Auto smelt with debug logs, matches all common hosts
 // @match        *://*.swordmasters.io/*
+// @match        *://*.poki.com/*
+// @match        *://launch.playcanvas.com/*
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
 
 (function() {
     'use strict';
+    console.log('[AutoSmeltDebug] Script started!');
 
-    // ========== 用户配置（直接改这里） ==========
-    const ENABLED = true;                     // true=启用，false=禁用
-    const SELECTED_ORES = ['0', '1', '2', '3']; // 0=Coal, 1=Emerald, 2=Diamond, 3=Ruby
-    const SMELT_INTERVAL = 800;               // 检查间隔（毫秒）
-    const LOCK_DURATION = 2500;               // 熔炼后锁定时间（毫秒）
-    // ===========================================
+    // ===== 配置 =====
+    const ENABLED = true;
+    const SELECTED_ORES = ['0','1','2','3'];
+    // =================
 
     let app = null;
     let smeltLock = false;
@@ -35,7 +36,6 @@
         }
     }
 
-    // 强制重置熔炼状态（防止卡死）
     function resetSmeltState() {
         try {
             if (app) {
@@ -43,7 +43,6 @@
                 if (app.loadingPanelController && app.loadingPanelController.enabled !== undefined) app.loadingPanelController.enabled = false;
                 if (app.smelterUI && typeof app.smelterUI.close === 'function') app.smelterUI.close();
                 if (app.inputEnabled !== undefined) app.inputEnabled = true;
-                // 发送一个无害的同步请求
                 if (app.networkManager && app.networkManager.room) {
                     app.networkManager.room.send("Client:InventoryController:mergeAll");
                 }
@@ -53,17 +52,28 @@
 
     function doSmelt() {
         if (!ENABLED) return;
-        if (!app || !app.networkManager || !app.networkManager.localInv || !app.networkManager.room) return;
+        if (!app) { console.log('[AutoSmelt] app not ready'); return; }
+        if (!app.networkManager) { console.log('[AutoSmelt] no networkManager'); return; }
+        if (!app.networkManager.localInv) { console.log('[AutoSmelt] no localInv'); return; }
+        if (!app.networkManager.room) { console.log('[AutoSmelt] no room'); return; }
         if (smeltLock) return;
 
         const localInv = app.networkManager.localInv;
         const ores = localInv.ores;
-        if (!ores || ores.length === 0) return;
+        if (!ores || ores.length === 0) {
+            console.log('[AutoSmelt] no ores array');
+            return;
+        }
 
-        // 统计未熔炼的矿石数量
+        console.log('[AutoSmelt] Checking ores, count:', ores.length);
+
         const countMap = {};
         for (let ore of ores) {
-            // 有些矿石有 isMelted 属性，有些没有，没有则视为未熔炼
+            // 打印第一个矿石的结构，方便调试
+            if (Object.keys(countMap).length === 0 && !window._smOreSample) {
+                window._smOreSample = ore;
+                console.log('[AutoSmelt] Sample ore:', JSON.stringify(ore));
+            }
             if (ore.isMelted === true) continue;
             const type = String(ore.type);
             if (SELECTED_ORES.includes(type)) {
@@ -72,6 +82,8 @@
             }
         }
 
+        console.log('[AutoSmelt] Counts:', JSON.stringify(countMap));
+
         let targetItemId = null;
         for (let type in countMap) {
             if (countMap[type].count >= 10) {
@@ -79,48 +91,55 @@
                 break;
             }
         }
-        if (!targetItemId) return;
+        if (!targetItemId) {
+            console.log('[AutoSmelt] No ore with >=10 found');
+            return;
+        }
 
-        // 锁定，避免重复
+        console.log('[AutoSmelt] Sending forge for itemId:', targetItemId);
         smeltLock = true;
-
-        // 发送熔炼请求（有些服务器需要 count，有些只需要 itemId）
         app.networkManager.room.send("Client:SmelterController:forge", {
             activeItemId: targetItemId,
-            halfChance: true   // 如果服务器不接受，可以改为 count: 10
+            halfChance: true
         });
+        showNotification('Auto Smelt: ' + targetItemId + ' x10');
 
-        showNotification(`Auto Smelt: ${targetItemId} x10`);
-
-        // 熔炼后立即复位（但保留一点延迟让动画触发）
-        setTimeout(() => {
-            resetSmeltState();
-        }, 800);
-
-        // 解锁
+        setTimeout(() => resetSmeltState(), 800);
         setTimeout(() => {
             smeltLock = false;
-            // 再次复位，确保界面恢复
             resetSmeltState();
-        }, LOCK_DURATION);
+        }, 2500);
     }
 
     function init() {
+        console.log('[AutoSmeltDebug] init() called, looking for pc.Application');
         const checkApp = setInterval(() => {
             if (window.pc && window.pc.Application) {
+                console.log('[AutoSmeltDebug] pc.Application found');
                 const a = window.pc.Application.getApplication();
                 if (a) {
+                    console.log('[AutoSmeltDebug] app instance obtained');
                     app = a;
                     clearInterval(checkApp);
                     if (interval) clearInterval(interval);
-                    interval = setInterval(doSmelt, SMELT_INTERVAL);
-                    console.log('[AutoSmelt] Standalone fix loaded.');
-                    showNotification('Auto Smelt (standalone) active');
+                    interval = setInterval(doSmelt, 800);
+                    console.log('[AutoSmeltDebug] interval set, ready');
+                    showNotification('Auto Smelt active');
+                } else {
+                    console.log('[AutoSmeltDebug] getApplication() returned null');
                 }
+            } else {
+                console.log('[AutoSmeltDebug] pc.Application not yet available');
             }
-        }, 200);
+        }, 500);
     }
 
-    if (document.readyState === 'complete') init();
-    else window.addEventListener('load', init);
+    // 如果页面已加载，立即执行；否则等加载
+    if (document.readyState === 'complete') {
+        console.log('[AutoSmeltDebug] document ready complete, calling init');
+        init();
+    } else {
+        console.log('[AutoSmeltDebug] waiting for load event');
+        window.addEventListener('load', init);
+    }
 })();
