@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Auto Smelt (Fixed + Reset)
+// @name         Auto Smelt (Standalone Fix)
 // @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Auto smelt ores when >=10, with UI reset to prevent freeze
+// @version      3.0
+// @description  Auto smelt ores when >=10, no UI freeze, independent config
 // @match        *://*.swordmasters.io/*
 // @grant        none
 // @run-at       document-end
@@ -10,17 +10,17 @@
 
 (function() {
     'use strict';
+
+    // ========== 用户配置（直接改这里） ==========
+    const ENABLED = true;                     // true=启用，false=禁用
+    const SELECTED_ORES = ['0', '1', '2', '3']; // 0=Coal, 1=Emerald, 2=Diamond, 3=Ruby
+    const SMELT_INTERVAL = 800;               // 检查间隔（毫秒）
+    const LOCK_DURATION = 2500;               // 熔炼后锁定时间（毫秒）
+    // ===========================================
+
     let app = null;
     let smeltLock = false;
     let interval = null;
-
-    function getConfig() {
-        try {
-            const raw = localStorage.getItem('sm_pro_config');
-            if (raw) return JSON.parse(raw);
-        } catch(e) {}
-        return {};
-    }
 
     function showNotification(msg) {
         const area = document.getElementById('sm-notifs');
@@ -35,91 +35,74 @@
         }
     }
 
-    // 强制重置熔炼相关的锁定和UI
+    // 强制重置熔炼状态（防止卡死）
     function resetSmeltState() {
         try {
-            // 1. 重置游戏内的熔炼标志
-            if (app.isForgingItem !== undefined) {
-                app.isForgingItem = false;
+            if (app) {
+                if (app.isForgingItem !== undefined) app.isForgingItem = false;
+                if (app.loadingPanelController && app.loadingPanelController.enabled !== undefined) app.loadingPanelController.enabled = false;
+                if (app.smelterUI && typeof app.smelterUI.close === 'function') app.smelterUI.close();
+                if (app.inputEnabled !== undefined) app.inputEnabled = true;
+                // 发送一个无害的同步请求
+                if (app.networkManager && app.networkManager.room) {
+                    app.networkManager.room.send("Client:InventoryController:mergeAll");
+                }
             }
-            // 2. 关闭加载遮罩（如果有）
-            if (app.loadingPanelController && app.loadingPanelController.enabled !== undefined) {
-                app.loadingPanelController.enabled = false;
-            }
-            // 3. 如果有熔炼界面控制器，尝试关闭
-            if (app.smelterUI && typeof app.smelterUI.close === 'function') {
-                app.smelterUI.close();
-            }
-            // 4. 如果有全局的UI锁定，解除（有些游戏用 inputEnabled）
-            if (app.inputEnabled !== undefined) {
-                app.inputEnabled = true;
-            }
-            // 5. 触发库存刷新（发送一个无害的请求，如合并，迫使同步）
-            if (app.networkManager && app.networkManager.room) {
-                // 发送一个空操作或合并请求，让服务器响应以唤醒客户端
-                app.networkManager.room.send("Client:InventoryController:mergeAll");
-            }
-        } catch(e) {
-            // 忽略错误
-        }
+        } catch(e) {}
     }
 
     function doSmelt() {
-        const config = getConfig();
-        if (!config.autoSmeltEnabled) return;
+        if (!ENABLED) return;
         if (!app || !app.networkManager || !app.networkManager.localInv || !app.networkManager.room) return;
-        if (app.isForgingItem || smeltLock) return;
+        if (smeltLock) return;
 
         const localInv = app.networkManager.localInv;
         const ores = localInv.ores;
         if (!ores || ores.length === 0) return;
 
-        const selectedTypes = (config.autoSmeltSelectedOres || ['0','1','2','3']).map(String);
+        // 统计未熔炼的矿石数量
         const countMap = {};
-
         for (let ore of ores) {
-            if (ore.isMelted) continue;
+            // 有些矿石有 isMelted 属性，有些没有，没有则视为未熔炼
+            if (ore.isMelted === true) continue;
             const type = String(ore.type);
-            if (selectedTypes.includes(type)) {
+            if (SELECTED_ORES.includes(type)) {
                 if (!countMap[type]) countMap[type] = { count: 0, itemId: ore.itemId };
                 countMap[type].count++;
             }
         }
 
-        let foundItemId = null;
+        let targetItemId = null;
         for (let type in countMap) {
             if (countMap[type].count >= 10) {
-                foundItemId = countMap[type].itemId;
+                targetItemId = countMap[type].itemId;
                 break;
             }
         }
-        if (!foundItemId) return;
+        if (!targetItemId) return;
 
         // 锁定，避免重复
         smeltLock = true;
 
-        // 发送熔炼请求
+        // 发送熔炼请求（有些服务器需要 count，有些只需要 itemId）
         app.networkManager.room.send("Client:SmelterController:forge", {
-            activeItemId: foundItemId,
-            halfChance: true
+            activeItemId: targetItemId,
+            halfChance: true   // 如果服务器不接受，可以改为 count: 10
         });
 
-        showNotification(`Auto Smelt: ${foundItemId} x10`);
+        showNotification(`Auto Smelt: ${targetItemId} x10`);
 
-        // 延迟重置状态（等待动画时间，约2秒）
+        // 熔炼后立即复位（但保留一点延迟让动画触发）
         setTimeout(() => {
             resetSmeltState();
-            smeltLock = false;
-        }, 2000);
+        }, 800);
 
-        // 额外保险：如果3秒后仍未解锁，强制解锁
+        // 解锁
         setTimeout(() => {
-            if (smeltLock) {
-                resetSmeltState();
-                smeltLock = false;
-                showNotification("Smelt reset (forced)");
-            }
-        }, 3500);
+            smeltLock = false;
+            // 再次复位，确保界面恢复
+            resetSmeltState();
+        }, LOCK_DURATION);
     }
 
     function init() {
@@ -130,9 +113,9 @@
                     app = a;
                     clearInterval(checkApp);
                     if (interval) clearInterval(interval);
-                    interval = setInterval(doSmelt, 600);
-                    console.log('[AutoSmelt] Fixed version loaded.');
-                    showNotification("Auto Smelt (fixed) active");
+                    interval = setInterval(doSmelt, SMELT_INTERVAL);
+                    console.log('[AutoSmelt] Standalone fix loaded.');
+                    showNotification('Auto Smelt (standalone) active');
                 }
             }
         }, 200);
